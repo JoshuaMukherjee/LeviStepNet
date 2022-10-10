@@ -28,12 +28,12 @@ class TimeDataset(Dataset):
                 change += dxyz
                 time_series[i] = p + change
             
-            self.points.append(time_series)
-            self.changes.append(changes)
+            self.points.append(time_series.permute(0,2,1)) 
+            self.changes.append(changes.permute(0,2,1))
             
 
-            pressures = torch.zeros((self.timestamps,self.N))
-            activations = torch.zeros(self.timestamps,512,1)
+            pressures = torch.zeros((self.timestamps,self.N)) + 0j
+            activations = torch.zeros(self.timestamps,512,1) + 0j
             
             for i,points in enumerate(time_series):
                 A=forward_model(points, transducers()).to(device)
@@ -50,8 +50,9 @@ class TimeDataset(Dataset):
         return self.length
 
     def __getitem__(self,i):
-         pass
+         return self.points[i], self.changes[i],self.activations[i],self.pressures[i]
 
 
 if __name__ == "__main__":
     data = TimeDataset(2,3)
+    print(data[0][1])
