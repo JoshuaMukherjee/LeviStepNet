@@ -1,3 +1,4 @@
+from re import A
 import torch
 from torch.nn import Module
 from SymmetricFunctions import SymMax
@@ -52,8 +53,103 @@ class PointNet(Module):
                         norm = batch_norm[i][j]
                         if act is not None:
                             self.layers[i].append(norm(out_channels,**batch_args[i][j]))
+   
+        print(self.layers)
 
+    def forward(self, x):
+        out = x
+        for layer in self.layers[0]:
+            out = layer(out)
+        local_features = out
+        for layer in self.layers[1]:
+            out = layer(out)
         
+        out = self.sym_function(out)
+        N = x.shape[2]
+        global_features = torch.Tensor.expand(out.unsqueeze_(2),-1,-1,N)
+        out = torch.cat((local_features,global_features),dim=1)
+        for layer in self.layers[2]:
+            out = layer(out)
+        
+        if self.output_funct is not None:
+           out = self.output_funct(out)
+        return out
+
+
+
+class MLP(Module):
+    def __init__(self, layers, input_size=512, activation=torch.nn.SELU, batch_norm=None,batch_args={}):
+        super(MLP,self).__init__()
+        self.layers = torch.nn.ModuleList()
+        
+        in_channels= input_size
+        out_channels = layers[0]
+        self.layers.append(torch.nn.Linear(in_channels,out_channels))
+        if type(activation) is not list and activation is not None:
+                self.layers.append(activation())
+        elif type(activation) is list :
+            self.layers.append(activation[0]())
+
+        if type(batch_norm) is not list and batch_norm is not None:
+            self.layers.append(batch_norm(out_channels,**batch_args))
+        elif type(batch_norm) is list :
+            self.layers.append(batch_norm[0](out_channels,**batch_args))
+       
+        for i,layer in enumerate(layers[1:]):
+            in_channels = layers[i]
+            out_channels = layer
+            self.layers.append(torch.nn.Linear(in_channels,out_channels))
+
+            if type(activation) is not list and activation is not None:
+                self.layers.append(activation())
+            elif type(activation) is list :
+                self.layers.append(activation[i+1]())
+            
+            if type(batch_norm) is not list and batch_norm is not None:
+                self.layers.append(batch_norm(out_channels,**batch_args))
+            elif type(batch_norm) is list :
+                self.layers.append(batch_norm[i+1](out_channels,**batch_args))
+        
+        print(self.layers)
+    
+    def forward(self,x):
+        out = x
+        for layer in self.layers:
+            out = layer(out)
+        return out
+
+if __name__ == "__main__":
+
+    layers = [100,200,400,300]
+    act = [torch.nn.ReLU, torch.nn.GELU, torch.nn.SELU,torch.nn.Sigmoid]
+    bn = torch.nn.BatchNorm1d
+    net = MLP(layers,activation=act,batch_norm=bn)
+
+    point = torch.ones((2,512))
+    print(point)
+    net(point)
+
+
+
+    # from Dataset import *
+    # from torch.utils.data import DataLoader 
+    # from SymmetricFunctions import SymSum
+
+    # m = 512
+    # layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
+    # norm = torch.nn.BatchNorm2d
+    # net = PointNet(layers,output_funct = SymSum)
+
+    # data = TimeDataset(5,3)
+    # points = DataLoader(data,2,shuffle=True)
+    # changes = next(iter(points))[1]
+
+    # for i in range(1,changes.shape[1]):
+    #     #itterate over timestamps
+    #     change = changes[:,i,:,:] #Get batch
+    #     print(net(change))
+
+
         # if output_layers is not None:
             
         #     self.output_NN = True
@@ -92,49 +188,3 @@ class PointNet(Module):
         #             else:
         #                 norm = out_batch_norm[i+1]
         #                 self.layers[-1].append(out_batch_norm(out_channel,**out_batch_norm_args))
-                    
-            
-       
-        print(self.layers)
-
-    def forward(self, x):
-        out = x
-        for layer in self.layers[0]:
-            out = layer(out)
-        local_features = out
-        for layer in self.layers[1]:
-            out = layer(out)
-        
-        out = self.sym_function(out)
-        N = x.shape[2]
-        global_features = torch.Tensor.expand(out.unsqueeze_(2),-1,-1,N)
-        out = torch.cat((local_features,global_features),dim=1)
-        for layer in self.layers[2]:
-            out = layer(out)
-        
-        if self.output_funct is not None:
-           out = self.output_funct(out)
-        return out
-
-        
-
-
-if __name__ == "__main__":
-    from Dataset import *
-    from torch.utils.data import DataLoader 
-    from SymmetricFunctions import SymSum
-
-    m = 512
-    layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
-    out_layers = [10]
-    norm = torch.nn.BatchNorm2d
-    net = PointNet(layers,output_funct = SymSum)
-
-    data = TimeDataset(5,3)
-    points = DataLoader(data,2,shuffle=True)
-    changes = next(iter(points))[1]
-
-    for i in range(1,changes.shape[1]):
-        #itterate over timestamps
-        change = changes[:,i,:,:] #Get batch
-        print(net(change))
