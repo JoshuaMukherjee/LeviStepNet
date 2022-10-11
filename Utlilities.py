@@ -16,7 +16,7 @@ def create_board(N, z):
 def transducers():
   return torch.cat((create_board(17,.234/2),create_board(17,-.234/2)),axis=0).to(device)
 
-def forward_model(points, transducers):
+def forward_model(points, transducers = transducers()):
     m=points.size()[0]
     n=transducers.size()[0]
     k=2*math.pi/0.00865
@@ -36,3 +36,8 @@ def forward_model(points, transducers):
     phase=torch.exp(1j*k*distance)
     trans_matrix=2*8.02*torch.multiply(torch.divide(phase,distance),directivity)
     return trans_matrix
+
+
+def propagate(activations, points):
+    A = forward_model(points)
+    return A@activations
