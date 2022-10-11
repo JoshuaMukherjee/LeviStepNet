@@ -41,3 +41,14 @@ def forward_model(points, transducers = transducers()):
 def propagate(activations, points):
     A = forward_model(points)
     return A@activations
+
+
+def permute_points(points,index,axis=0):
+    if axis == 0:
+        return points[index,:,:,:]
+    if axis == 1:
+        return points[:,index,:,:]
+    if axis == 2:
+        return points[:,:,index,:]
+    if axis == 3:
+        return points[:,:,:,index]
