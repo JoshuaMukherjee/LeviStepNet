@@ -3,6 +3,7 @@ from numpy import zeros_like
 import torch
 from torch.nn import Module
 from Symmetric_Functions import SymMax
+from Utlilities import device
 
 
 
@@ -45,24 +46,24 @@ class PointNet(Module):
                     in_channels = layer_sets[i-1][-1]
                     out_channels = layer
                 
-                mod = torch.nn.Conv1d(in_channels,out_channels,kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode)
+                mod = torch.nn.Conv1d(in_channels,out_channels,kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
                 
                 self.layers[i].append(mod)
                 
                 if type(activation) is not list:
-                    self.layers[i].append(activation())
+                    self.layers[i].append(activation().to(device))
                 else:
                     act = activation[i][j]
                     if act is not None:
-                        self.layers[i].append(act())
+                        self.layers[i].append(act().to(device))
                 
                 if batch_norm is not None:
                     if type(batch_norm) is not list:
-                        self.layers[i].append(batch_norm(out_channels,**batch_args))
+                        self.layers[i].append(batch_norm(out_channels,**batch_args).to(device))
                     else:
                         norm = batch_norm[i][j]
                         if act is not None:
-                            self.layers[i].append(norm(out_channels,**batch_args[i][j]))
+                            self.layers[i].append(norm(out_channels,**batch_args[i][j]).to(device))
             
         # print(self.layers)
 
@@ -97,31 +98,31 @@ class MLP(Module):
         
         in_channels= input_size
         out_channels = layers[0]
-        self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args))
+        self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
         if type(activation) is not list and activation is not None:
-                self.layers.append(activation())
+                self.layers.append(activation().to(device))
         elif type(activation) is list :
-            self.layers.append(activation[0]())
+            self.layers.append(activation[0]().to(device))
 
         if type(batch_norm) is not list and batch_norm is not None:
-            self.layers.append(batch_norm(out_channels,**batch_args))
+            self.layers.append(batch_norm(out_channels,**batch_args).to(device))
         elif type(batch_norm) is list :
-            self.layers.append(batch_norm[0](out_channels,**batch_args))
+            self.layers.append(batch_norm[0](out_channels,**batch_args).to(device))
        
         for i,layer in enumerate(layers[1:]):
             in_channels = layers[i]
             out_channels = layer
-            self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args))
+            self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
 
             if type(activation) is not list and activation is not None:
-                self.layers.append(activation())
+                self.layers.append(activation().to(device))
             elif type(activation) is list :
-                self.layers.append(activation[i+1]())
+                self.layers.append(activation[i+1]().to(device))
             
             if type(batch_norm) is not list and batch_norm is not None:
-                self.layers.append(batch_norm(out_channels,**batch_args))
+                self.layers.append(batch_norm(out_channels,**batch_args).to(device))
             elif type(batch_norm) is list :
-                self.layers.append(batch_norm[i+1](out_channels,**batch_args))
+                self.layers.append(batch_norm[i+1](out_channels,**batch_args).to(device))
         
     
     def forward(self,x):
