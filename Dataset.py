@@ -46,8 +46,8 @@ class TimeDataset(Dataset):
             self.pressures.append(pressures)
             self.activations.append(activations)
 
-            if i % 100 == 0:
-                print(".",end="",flush=True)
+            if i % 200 == 0:
+                print(i,end=" ",flush=True)
     
     def __len__(self):
         return self.length
