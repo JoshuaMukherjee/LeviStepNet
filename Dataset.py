@@ -6,7 +6,7 @@ from Solvers import wgs
 
 class TimeDataset(Dataset):
     def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None):
-        self.length = length #Number of point sets
+        self.length = length #Number of point sets in the Dataset (length)
         self.timestamps = timestamps #number of changes in an element
         self.N = N #Number of points per set
         self.seed = seed #custom seed
@@ -19,8 +19,8 @@ class TimeDataset(Dataset):
         self.pressures = []
 
         for i in range(self.length):
-            p = torch.FloatTensor(self.N,3).uniform_(-.06,.06).to(device)
-            changes = torch.FloatTensor(self.timestamps,self.N,3).uniform_(-1*self.threshold,self.threshold).to(device)
+            p = torch.FloatTensor(3,self.N).uniform_(-.06,.06).to(device)
+            changes = torch.FloatTensor(self.timestamps,3,self.N).uniform_(-1*self.threshold,self.threshold).to(device)
             changes[0,:,:] = 0
             time_series = torch.zeros_like(changes)
             change = 0
@@ -28,8 +28,11 @@ class TimeDataset(Dataset):
                 change += dxyz
                 time_series[i] = p + change
             
-            self.points.append(time_series.permute(0,2,1)) 
-            self.changes.append(changes.permute(0,2,1))
+            # self.points.append(time_series.permute(0,2,1)) 
+            # self.changes.append(changes.permute(0,2,1))
+
+            self.points.append(time_series) 
+            self.changes.append(changes)
             
 
             pressures = torch.zeros((self.timestamps,self.N)) + 0j
@@ -54,5 +57,15 @@ class TimeDataset(Dataset):
 
 
 if __name__ == "__main__":
-    data = TimeDataset(2,3)
-    print(data[0][1])
+    timestamps = 2
+    length = 10
+    test_length = 5
+    N = 4
+    train = TimeDataset(length,timestamps,N=N)
+    torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+".pth")
+
+    if test_length > 0:
+        test = TimeDataset(test_length,timestamps,N=N)
+        torch.save(test,"Datasets/Test-"+str(timestamps)+"-"+str(test_length)+"-"+str(N)+".pth")
+    
+   

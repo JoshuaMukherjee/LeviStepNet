@@ -2,21 +2,18 @@ from re import A
 from numpy import zeros_like
 import torch
 from torch.nn import Module
-from SymmetricFunctions import SymMax
+from Symmetric_Functions import SymMax
 
 
 
 class PointNet(Module):
     def __init__(self, layer_sets,input_size=3, 
-                    activation=torch.nn.SELU, 
+                    activation=torch.nn.ReLU, 
                     kernel=1, kernel_pad="same",padding_mode="zeros",
                     batch_norm=None,batch_args={},
                     sym_function=SymMax, sym_args={},
-                    output_funct=None, output_funct_args = {},
-                    output_layers = None, out_activation=torch.nn.SELU,output_layers_args={},
-                    out_batch_norm=None, out_batch_norm_args={}
-
-                    ):
+                    output_funct=None, output_funct_args = {}
+                ):
         super(PointNet,self).__init__()
         self.layers = []
         self.sym_function = sym_function(**sym_args)
@@ -24,7 +21,12 @@ class PointNet(Module):
             self.output_funct = output_funct(**output_funct_args)
         else:
             self.output_funct = None
-        self.NN= False
+        
+        if type(batch_norm) == str:
+            batch_norm = getattr(torch.nn,batch_norm)
+        
+        if type(activation) == str:
+            activation = getattr(torch.nn,activation) 
 
         local_features = layer_sets[0][-1]
         for i,layer_set in enumerate(layer_sets):
@@ -62,44 +64,6 @@ class PointNet(Module):
                         if act is not None:
                             self.layers[i].append(norm(out_channels,**batch_args[i][j]))
             
-        if output_layers is not None: #option to add MLP to output
-            self.output_NN = True
-            self.layers.append(torch.nn.ModuleList())
-
-            in_channel = layer_sets[-1][-1]
-            out_channel = output_layers[0]
-            self.layers[-1].append(torch.nn.Linear(in_channel,out_channel))
-            if type(out_activation) is not list:
-                self.layers[-1].append(out_activation())
-            else:
-                act = out_activation[0]
-                self.layers[-1].append(act())
-            
-            if out_batch_norm is not None:
-                if type(out_batch_norm) is not list:
-                    self.layers[-1].append(out_batch_norm(out_channel,**out_batch_norm_args))
-                else:
-                    norm = out_batch_norm[i+1]
-                    self.layers[-1].append(out_batch_norm(out_channel,**out_batch_norm_args))
-                    
-
-            for i,layer in enumerate(output_layers[0:-1]):
-                in_channel = layer
-                out_channel = output_layers[i+1]
-                self.layers[-1].append(torch.nn.Linear(in_channel,out_channel,**output_layers_args))
-
-                if type(out_activation) is not list:
-                    self.layers[-1].append(out_activation())
-                else:
-                    act = out_activation[i+1]
-                    self.layers[-1].append(act())
-                if out_batch_norm is not None:
-                    if type(out_batch_norm) is not list:
-                        self.layers[-1].append(out_batch_norm(out_channel,**out_batch_norm_args))
-                    else:
-                        norm = out_batch_norm[i+1]
-                        self.layers[-1].append(out_batch_norm(out_channel,**out_batch_norm_args))
-   
         # print(self.layers)
 
     def forward(self, x):
@@ -117,12 +81,11 @@ class PointNet(Module):
         for layer in self.layers[2]:
             out = layer(out)
         
-        if self.NN is True:
-            for layer in self.layers[3]:
-                out = layer(out)
         
         if self.output_funct is not None:
-           out = self.output_funct(out)
+            out = self.output_funct(out)
+        
+
         return out
 
 
@@ -160,7 +123,6 @@ class MLP(Module):
             elif type(batch_norm) is list :
                 self.layers.append(batch_norm[i+1](out_channels,**batch_args))
         
-        print(self.layers)
     
     def forward(self,x):
         out = x
@@ -183,31 +145,33 @@ if __name__ == "__main__":
 
     from Dataset import *
     from torch.utils.data import DataLoader 
-    from SymmetricFunctions import SymSum
+    from Symmetric_Functions import SymSum
 
     m = 512
     layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
-    output_layers = [10,20]
     norm = torch.nn.BatchNorm1d
-    net = PointNet(layers,batch_norm=norm,out_batch_norm=norm)
+    net = PointNet(layers,batch_norm=norm)
+    print(net.layers)
 
-    data = TimeDataset(5,3)
+    data = TimeDataset(5,4)
     points = DataLoader(data,2,shuffle=True)
-    changes = next(iter(points))[1]
+    points,changes,_,_ = next(iter(points))
     perm = permute_points(changes,[0,2,1,3],axis=3)
 
-    for i in range(1,changes.shape[1]):
+    for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
         #itterate over timestamps
         change = changes[:,i,:,:] #Get batch
         out = net(change)
-        print(out)
-        print(out.shape)
+        p=points[:,i,:,:]
+        print(swap_output_to_activations(out,p))
+        # print(out)
+        # print(out.shape)
 
-        permed = perm[:,i,:,:]
-        perm_out = net(change)
-        print(torch.all(perm_out == out))
-        print(torch.all(permed==change))
+        # permed = perm[:,i,:,:]
+        # perm_out = net(change)
+        # print(torch.all(perm_out == out))
+        # print(torch.all(permed==change))
 
-        rand = torch.rand_like(change)
-        rand_out = net(rand)
-        print(torch.all(rand_out == out))
+        # rand = torch.rand_like(change)
+        # rand_out = net(rand)
+        # print(torch.all(rand_out == out))

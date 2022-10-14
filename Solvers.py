@@ -2,7 +2,7 @@ from Utlilities import *
 import torch
 
 def wgs(A, b, K):
-    
+    #Written by Giorgos Christopoulos 2022
     AT = torch.conj(A).T.to(device)
     b0 = b.to(device)
     x = torch.ones(A.shape[1],1).to(device) + 0j
