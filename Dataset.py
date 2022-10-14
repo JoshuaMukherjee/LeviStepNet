@@ -17,16 +17,16 @@ class TimeDataset(Dataset):
         self.changes = []
         self.activations = []
         self.pressures = []
-
-        for i in range(self.length):
+        print(self.length)
+        for batch in range(self.length):
             p = torch.FloatTensor(3,self.N).uniform_(-.06,.06).to(device)
             changes = torch.FloatTensor(self.timestamps,3,self.N).uniform_(-1*self.threshold,self.threshold).to(device)
             changes[0,:,:] = 0
             time_series = torch.zeros_like(changes)
             change = 0
-            for i,dxyz in enumerate(changes):
+            for j,dxyz in enumerate(changes):
                 change += dxyz
-                time_series[i] = p + change
+                time_series[j] = p + change
             
             # self.points.append(time_series.permute(0,2,1)) 
             # self.changes.append(changes.permute(0,2,1))
@@ -46,8 +46,8 @@ class TimeDataset(Dataset):
             self.pressures.append(pressures)
             self.activations.append(activations)
 
-            if i % 200 == 0:
-                print(i,end=" ",flush=True)
+            if batch % 200 == 0:
+                print(batch,end=" ",flush=True)
     
     def __len__(self):
         return self.length
