@@ -42,13 +42,12 @@ def forward_model(points, transducers = transducers()):
 
 
 def propagate(activations, points):
-    out = None
+    out = []
     for i in range(activations.shape[0]):
         A = forward_model(points[i]).to(device)
-        if out == None:
-            out = A@activations[i]
-        else:
-            out = torch.stack((out,A@activations[i]),0)
+       
+        out.append(A@activations[i])
+    out = torch.stack(out,0)
     return out.squeeze()
 
 
