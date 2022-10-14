@@ -57,7 +57,7 @@ class TimeDataset(Dataset):
 
 
 if __name__ == "__main__":
-    timestamps = 1
+    timestamps = 2
     length = 30000
     test_length = 5000
     N = 4
