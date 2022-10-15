@@ -12,7 +12,7 @@ from Dataset import TimeDataset
 
 
 files = [
-    "Updater1.json"
+    "Updater2.json","Updater3.json","Updater4.json"
 ]
 
 

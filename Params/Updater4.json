@@ -1,0 +1,23 @@
+{
+    "net":"PointNet",
+    "net-args":{
+        "layer_sets":[[64,64],[64,128,1024],[512,256,128,128,1024]],
+        "batch_norm":"BatchNorm1d",
+        "input_size":23
+    },
+    "encoder":"MLP",
+    "encoder-args":{
+        "layers":[256,64,20]
+    },
+    "updater":"Updater",
+    "start-epochs":0,
+    "epochs":500,
+    "train":["Train-2-30000-4.pth"],
+    "test":["Test-2-5000-4.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-3},
+    "loss-function":"max_loss",
+    "supervised":true,
+    "batch":15
+
+}
