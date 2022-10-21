@@ -106,9 +106,19 @@ class MLP(Module):
 
         self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
         if type(activation) is not list and activation is not None:
-                self.layers.append(activation().to(device))
+            if type(activation) == str:
+                try:
+                    activation = getattr(torch.nn,activation) 
+                except AttributeError:
+                    activation = getattr(Activations,activation) 
+            self.layers.append(activation().to(device))
         elif type(activation) is list :
-            self.layers.append(activation[0]().to(device))
+            if type(activation[0]) == str:
+                try:
+                    activation = getattr(torch.nn,activation[0]) 
+                except AttributeError:
+                    activation = getattr(Activations,activation[0]) 
+            self.layers.append(activation().to(device))
 
         if type(batch_norm) is not list and batch_norm is not None:
             self.layers.append(batch_norm(out_channels,**batch_args).to(device))
@@ -129,7 +139,7 @@ class MLP(Module):
 
                 self.layers.append(activation().to(device))
             elif type(activation) is list :
-                if type(activation) == str:
+                if type(activation[i+1]) == str:
                     try:
                         activation = getattr(torch.nn,activation[i+1]) 
                     except AttributeError:
