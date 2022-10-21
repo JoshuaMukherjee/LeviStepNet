@@ -1,9 +1,9 @@
-from re import A
-from numpy import zeros_like
 import torch
 from torch.nn import Module
 from Symmetric_Functions import SymMax
 from Utlilities import device
+
+import Activations
 
 
 
@@ -98,6 +98,12 @@ class MLP(Module):
         
         in_channels= input_size
         out_channels = layers[0]
+
+        if type(batch_norm) == str:
+            batch_norm = getattr(torch.nn,batch_norm)
+        
+
+
         self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
         if type(activation) is not list and activation is not None:
                 self.layers.append(activation().to(device))
@@ -115,9 +121,21 @@ class MLP(Module):
             self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
 
             if type(activation) is not list and activation is not None:
+                if type(activation) == str:
+                    try:
+                        activation = getattr(torch.nn,activation) 
+                    except AttributeError:
+                        activation = getattr(Activations,activation) 
+
                 self.layers.append(activation().to(device))
             elif type(activation) is list :
-                self.layers.append(activation[i+1]().to(device))
+                if type(activation) == str:
+                    try:
+                        activation = getattr(torch.nn,activation[i+1]) 
+                    except AttributeError:
+                        activation = getattr(Activations,activation[i+1]) 
+                
+                self.layers.append(activation().to(device))
             
             if type(batch_norm) is not list and batch_norm is not None:
                 self.layers.append(batch_norm(out_channels,**batch_args).to(device))
