@@ -1,0 +1,21 @@
+{
+    "encoder-args":{
+        "layers":[256,64,16,8],
+        "activation":"SineActivation"
+    },
+    "decoder-args":{
+        "layers":[16,64,256,512],
+        "activation":"SineActivation",
+        "input_size":8
+    },
+    "start-epochs":0,
+    "epochs":5000,
+    "train":["Train-2-30000-4.pth"],
+    "test":["Test-2-5000-4.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-4},
+    "loss-function":"mse_loss",
+    "batch":16,
+    "in_func":"AE_var",
+    "out_func":"AE_vac"
+}

@@ -12,7 +12,7 @@ from Dataset import TimeDataset
 
 
 files = [
-    "UpdaterLong1.json"
+    "UpdaterLong1"
 ]
 
 
@@ -53,7 +53,7 @@ def parse(params,name):
 
 for file in files:
     try:
-        params = json.load(open("Params/"+file,"r"))
+        params = json.load(open("Params/"+file+".json","r"))
         parse(params,file)
     except Exception as e:
         print(traceback.format_exc())
