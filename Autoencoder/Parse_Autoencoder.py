@@ -21,14 +21,14 @@ import Loss_Functions
 
 def parse(params,file):
     encoder_args = params["encoder-args"]
-    encoder = MLP(**encoder_args)
+    encoder = MLP(**encoder_args).to(device)
     decoder_args = params["decoder-args"]
-    decoder = MLP(**decoder_args)
+    decoder = MLP(**decoder_args).to(device)
 
     in_func = getattr(Autoencoder_funcs, params["in_func"])
     out_func = getattr(Autoencoder_funcs, params["out_func"])
 
-    autoencoder = AutoencoderNet(encoder,decoder,in_func,out_func)
+    autoencoder = AutoencoderNet(encoder,decoder,in_func,out_func).to(device)
 
     start_epochs = params["start-epochs"]
     epochs = params["epochs"]
