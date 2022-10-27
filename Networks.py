@@ -92,7 +92,8 @@ class PointNet(Module):
 
 
 class MLP(Module):
-    def __init__(self, layers, input_size=512, activation=torch.nn.SELU, batch_norm=None,batch_args={},layer_args={}):
+    def __init__(self, layers, input_size=512,layer_args={},
+                    activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=2):
         super(MLP,self).__init__()
         self.layers = torch.nn.ModuleList()
         
@@ -105,6 +106,7 @@ class MLP(Module):
 
 
         self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
+        
         if type(activation) is not list and activation is not None:
             if type(activation) == str:
                 try:
@@ -115,18 +117,18 @@ class MLP(Module):
         elif type(activation) is list :
             if type(activation[0]) == str:
                 try:
-                    activation = getattr(torch.nn,activation[0]) 
+                    act = getattr(torch.nn,activation[0]) 
                 except AttributeError:
-                    activation = getattr(Activations,activation[0]) 
-            self.layers.append(activation().to(device))
+                    act = getattr(Activations,activation[0]) 
+            self.layers.append(act().to(device))
 
         if type(batch_norm) is not list and batch_norm is not None:
-            self.layers.append(batch_norm(out_channels,**batch_args).to(device))
+            self.layers.append(batch_norm(batch_channels,**batch_args).to(device))
         elif type(batch_norm) is list :
-            self.layers.append(batch_norm[0](out_channels,**batch_args).to(device))
+            self.layers.append(batch_norm[0](batch_channels,**batch_args).to(device))
        
         for i,layer in enumerate(layers[1:]):
-            in_channels = layers[i]
+            in_channels = layers[i] #As starting from [1:] in layers i will be actually one off from position
             out_channels = layer
             self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
 
@@ -148,10 +150,11 @@ class MLP(Module):
                 self.layers.append(activation().to(device))
             
             if type(batch_norm) is not list and batch_norm is not None:
-                self.layers.append(batch_norm(out_channels,**batch_args).to(device))
+                self.layers.append(batch_norm(batch_channels,**batch_args).to(device))
             elif type(batch_norm) is list :
-                self.layers.append(batch_norm[i+1](out_channels,**batch_args).to(device))
+                self.layers.append(batch_norm[i+1](batch_channels,**batch_args).to(device))
         
+        print(self.layers)
     
     def forward(self,x):
         out = x
@@ -161,46 +164,46 @@ class MLP(Module):
 
 if __name__ == "__main__":
 
-    # layers = [100,200,400,300]
-    # act = [torch.nn.ReLU, torch.nn.GELU, torch.nn.SELU,torch.nn.Sigmoid]
-    # bn = torch.nn.BatchNorm1d
-    # net = MLP(layers,activation=act,batch_norm=bn)
+    layers = [100,200,400,300]
+    act = ["ReLU", "GELU", "SELU","Sigmoid"]
+    bn = torch.nn.BatchNorm1d
+    net = MLP(layers,activation=act,batch_norm=bn)
 
-    # point = torch.ones((2,512))
-    # print(point)
-    # net(point)
+    point = torch.ones((2,512))
+    print(point)
+    net(point)
 
 
 
-    from Dataset import *
-    from torch.utils.data import DataLoader 
-    from Symmetric_Functions import SymSum
+    # from Dataset import *
+    # from torch.utils.data import DataLoader 
+    # from Symmetric_Functions import SymSum
 
-    m = 512
-    layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
-    norm = torch.nn.BatchNorm1d
-    net = PointNet(layers,batch_norm=norm)
-    print(net.layers)
+    # m = 512
+    # layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
+    # norm = torch.nn.BatchNorm1d
+    # net = PointNet(layers,batch_norm=norm)
+    # print(net.layers)
 
-    data = TimeDataset(5,4)
-    points = DataLoader(data,2,shuffle=True)
-    points,changes,_,_ = next(iter(points))
-    perm = permute_points(changes,[0,2,1,3],axis=3)
+    # data = TimeDataset(5,4)
+    # points = DataLoader(data,2,shuffle=True)
+    # points,changes,_,_ = next(iter(points))
+    # perm = permute_points(changes,[0,2,1,3],axis=3)
 
-    for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
-        #itterate over timestamps
-        change = changes[:,i,:,:] #Get batch
-        out = net(change)
-        p=points[:,i,:,:]
-        print(swap_output_to_activations(out,p))
-        # print(out)
-        # print(out.shape)
+    # for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
+    #     #itterate over timestamps
+    #     change = changes[:,i,:,:] #Get batch
+    #     out = net(change)
+    #     p=points[:,i,:,:]
+    #     print(swap_output_to_activations(out,p))
+    #     # print(out)
+    #     # print(out.shape)
 
-        # permed = perm[:,i,:,:]
-        # perm_out = net(change)
-        # print(torch.all(perm_out == out))
-        # print(torch.all(permed==change))
+    #     # permed = perm[:,i,:,:]
+    #     # perm_out = net(change)
+    #     # print(torch.all(perm_out == out))
+    #     # print(torch.all(permed==change))
 
-        # rand = torch.rand_like(change)
-        # rand_out = net(rand)
-        # print(torch.all(rand_out == out))
+    #     # rand = torch.rand_like(change)
+    #     # rand_out = net(rand)
+    #     # print(torch.all(rand_out == out))
