@@ -58,8 +58,8 @@ class TimeDataset(Dataset):
 
 if __name__ == "__main__":
     timestamps = 2
-    length = 30000
-    test_length = 5000
+    length = 60000
+    test_length = 0
     N = 4
     train = TimeDataset(length,timestamps,N=N)
     torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+".pth")
