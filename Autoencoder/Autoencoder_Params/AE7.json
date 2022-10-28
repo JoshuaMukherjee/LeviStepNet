@@ -1,13 +1,13 @@
 {
     "encoder-args":{
-        "layers":[256,64,8,4],
+        "layers":[256,64,32,16],
         "activation":"ReLU",
         "batch_norm":"BatchNorm1d"
     },
     "decoder-args":{
-        "layers":[8,64,256,512],
+        "layers":[32,64,256,512],
         "activation":"ReLU",
-        "input_size":4,
+        "input_size":16,
         "batch_norm":"BatchNorm1d"
     },
     "start-epochs":0,
