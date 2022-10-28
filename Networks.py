@@ -153,9 +153,7 @@ class MLP(Module):
                 self.layers.append(batch_norm(batch_channels,**batch_args).to(device))
             elif type(batch_norm) is list :
                 self.layers.append(batch_norm[i+1](batch_channels,**batch_args).to(device))
-        
-        print(self.layers)
-    
+            
     def forward(self,x):
         out = x
         for layer in self.layers:
