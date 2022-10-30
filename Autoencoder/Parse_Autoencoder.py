@@ -53,7 +53,7 @@ def parse(params,file):
 
 
 files = [
-    "AE6","AE7"
+    "AE8"
 ]
 
 if __name__ == "__main__":

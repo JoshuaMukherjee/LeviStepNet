@@ -1,0 +1,31 @@
+{
+    "encoder-args":{
+        "layers":[256,64,32,16],
+        "activation":"ELU",
+        "batch_norm":"BatchNorm1d"
+    },
+    "decoder-args":{
+        "layers":[32,64,256,512],
+        "activation":"ELU",
+        "input_size":16,
+        "batch_norm":"BatchNorm1d"
+    },
+    "start-epochs":0,
+    "epochs":500,
+    "train":["Train-2-60000-4.pth"],
+    "test":["Test-2-5000-4.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-4},
+    "loss-function":"mse_loss",
+    "batch":16,
+    "in_func":"AE_var",
+    "out_func":"AE_vac",
+    "scheduler":"CyclicLR",
+    "scheduler-args":{"base_lr":1e-4,
+                        "max_lr":1e-2,
+                        "step_size_up":5,
+                        "mode":"exp_range",
+                        "cycle_momentum":false,
+                        "gamma":0.999
+                    }
+}
