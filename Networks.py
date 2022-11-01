@@ -167,7 +167,6 @@ class MLP(Module):
         for layer in self.layers:
             out = layer(out)
            
-        exit()
         return out
 
 if __name__ == "__main__":
