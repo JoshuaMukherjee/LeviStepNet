@@ -2,7 +2,8 @@
     "encoder-args":{
         "layers":[256,64,32],
         "activation":"PReLU",
-        "batch_norm":"BatchNorm1d"
+        "batch_norm":"BatchNorm1d",
+        "input_size":1024
     },
     "decoder-args":{
         "layers":[64,256,1024],
