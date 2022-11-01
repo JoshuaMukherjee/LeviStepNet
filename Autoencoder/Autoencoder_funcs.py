@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
     a,b, activations ,d = next(iter(points))
     act = activations[:,0,:,:][:,:,0]
+    print(act)
     print(act.shape)
     real = stack_to_vector(act)
     print(real.shape)

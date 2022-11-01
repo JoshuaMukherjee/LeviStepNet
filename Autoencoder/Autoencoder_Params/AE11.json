@@ -1,0 +1,24 @@
+{
+    "encoder-args":{
+        "layers":[256,64],
+        "activation":"ELU",
+        "batch_norm":"BatchNorm1d",
+        "input_size":1024
+    },
+    "decoder-args":{
+        "layers":[256,1024],
+        "activation":"ELU",
+        "input_size":64,
+        "batch_norm":"BatchNorm1d"
+    },
+    "start-epochs":0,
+    "epochs":500,
+    "train":["Train-2-60000-4.pth"],
+    "test":["Test-2-5000-4.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-4},
+    "loss-function":"mse_loss",
+    "batch":16,
+    "in_func":"stack_to_vector",
+    "out_func":"vector_to_mat"
+}
