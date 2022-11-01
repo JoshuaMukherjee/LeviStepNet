@@ -93,7 +93,7 @@ class PointNet(Module):
 
 class MLP(Module):
     def __init__(self, layers, input_size=512,layer_args={},
-                    activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=2):
+                    activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=256):
         super(MLP,self).__init__()
         self.layers = torch.nn.ModuleList()
         
