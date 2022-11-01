@@ -24,7 +24,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, sche
                     
                     for i in range(0,activations.shape[1]): #iterate over timestamps
                         optimiser.zero_grad()
-                        act = activations[:,i,:,:][:,:,0]
+                        act = activations[:,i,:,:][:,:,0] #last indexing equivalent to squeeze without using squeeze
                         activation_out = net(act)
 
                         loss = loss_function(torch.view_as_real(activation_out),torch.view_as_real(act))
@@ -48,7 +48,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, sche
                 for points, changes, activations, pressures in iter(testing_dataset):                    
                     
                     for i in range(0,activations.shape[1]): #iterate over timestamps
-                        act = activations[:,i,:,:][:,:,0]
+                        act = activations[:,i,:,:][:,:,0] #last indexing equivalent to squeeze without using squeeze
                         activation_out = net(act)
                         loss = loss_function(torch.view_as_real(activation_out),torch.view_as_real(act))
                         running_test += loss.item()
