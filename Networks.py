@@ -93,7 +93,7 @@ class PointNet(Module):
 
 class MLP(Module):
     def __init__(self, layers, input_size=512,layer_args={},
-                    activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=256):
+                    activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=2,batch_old=False):
         super(MLP,self).__init__()
         self.layers = torch.nn.ModuleList()
         
@@ -123,9 +123,13 @@ class MLP(Module):
             self.layers.append(act().to(device))
 
         if type(batch_norm) is not list and batch_norm is not None:
-            self.layers.append(batch_norm(batch_channels,**batch_args).to(device))
+            if batch_old:
+                channel = batch_channels
+            else:
+                channel = out_channels
+            self.layers.append(batch_norm(channel,**batch_args).to(device))
         elif type(batch_norm) is list :
-            self.layers.append(batch_norm[0](batch_channels,**batch_args).to(device))
+            self.layers.append(batch_norm[0](channel,**batch_args).to(device))
        
         for i,layer in enumerate(layers[1:]):
             in_channels = layers[i] #As starting from [1:] in layers i will be actually one off from position
@@ -150,14 +154,19 @@ class MLP(Module):
                 self.layers.append(activation().to(device))
             
             if type(batch_norm) is not list and batch_norm is not None:
-                self.layers.append(batch_norm(batch_channels,**batch_args).to(device))
+                if batch_old:
+                    channel = batch_channels
+                else:
+                    channel = out_channels
+                self.layers.append(batch_norm(channel,**batch_args).to(device))
             elif type(batch_norm) is list :
-                self.layers.append(batch_norm[i+1](batch_channels,**batch_args).to(device))
+                self.layers.append(batch_norm[i+1](channel,**batch_args).to(device))
             
     def forward(self,x):
         out = x
         for layer in self.layers:
             out = layer(out)
+            print(out.shape)
         return out
 
 if __name__ == "__main__":

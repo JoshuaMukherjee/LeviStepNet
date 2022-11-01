@@ -18,7 +18,7 @@ def stack_to_vector(x):
     return vect
 
 def vector_to_mat(x):
-    mat = torch.reshape(real,(x.shape[0],2,-1)) #in the wrong order so vac's permute still works
+    mat = torch.reshape(x,(x.shape[0],2,-1)) #in the wrong order so vac's permute still works
     comp = AE_vac(mat)
     return comp
 

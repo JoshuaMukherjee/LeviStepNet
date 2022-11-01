@@ -2,13 +2,15 @@
     "encoder-args":{
         "layers":[256,64,32,16],
         "activation":"PReLU",
-        "batch_norm":"BatchNorm1d"
+        "batch_norm":"BatchNorm1d",
+        "batch_old":true
     },
     "decoder-args":{
         "layers":[32,64,256,512],
         "activation":"PReLU",
         "input_size":16,
-        "batch_norm":"BatchNorm1d"
+        "batch_norm":"BatchNorm1d",
+        "batch_old":true
     },
     "start-epochs":0,
     "epochs":500,
