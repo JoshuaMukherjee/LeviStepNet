@@ -53,7 +53,7 @@ def parse(params,file):
 
 
 files = [
-    "AEIdentity"
+    "AE12"
 ]
 
 if __name__ == "__main__":
