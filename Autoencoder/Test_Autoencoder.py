@@ -34,5 +34,3 @@ print(torch.view_as_real(act))
 print(torch.view_as_real(out))
 print(torch.view_as_real(act) - torch.view_as_real(out))
 print(torch.nn.MSELoss()(torch.view_as_real(act),torch.view_as_real(out)))
-
-print(torch.pca_lowrank(stack_to_vector(act)))
