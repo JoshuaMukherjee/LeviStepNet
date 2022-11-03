@@ -1,5 +1,5 @@
 import torch
-
+from sklearn import StandardScaler
 
 
 def AE_vac(x):
@@ -22,6 +22,12 @@ def vector_to_mat(x):
     comp = AE_vac(mat)
     return comp
 
+def scale_stack_to_vector(x):
+    real = AE_var(x)
+    vect = torch.reshape(real,(x.shape[0],-1))
+    scaler = StandardScaler()
+    arr_norm = scaler.fit_transform(vect.numpy())
+    return arr_norm.from_numpy()
 
 
 
