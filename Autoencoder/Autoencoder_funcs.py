@@ -1,5 +1,5 @@
 import torch
-from sklearn import StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 
 def AE_vac(x):
