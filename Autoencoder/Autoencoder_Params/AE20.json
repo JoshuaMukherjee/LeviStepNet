@@ -1,0 +1,32 @@
+{
+    "encoder-args":{
+        "layers":[512,512],
+        "activation":"SELU",
+        "batch_norm":"BatchNorm1d",
+        "input_size":1024
+    },
+    "decoder-args":{
+        "layers":[1024],
+        "activation":"SELU",
+        "input_size":512,
+        "batch_norm":"BatchNorm1d"
+    },
+    "start-epochs":0,
+    "epochs":100,
+    "train":["Train-2-60000-4.pth"],
+    "test":["Test-2-5000-4.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-4},
+    "loss-function":"mse_loss",
+    "batch":16,
+    "in_func":"stack_to_vector",
+    "out_func":"vector_to_mat", 
+    "scheduler":"CyclicLR",
+    "scheduler-args":{"base_lr":1e-5,
+                        "max_lr":1e-3,
+                        "step_size_up":5,
+                        "mode":"exp_range",
+                        "cycle_momentum":false,
+                        "gamma":0.999
+                    }
+}
