@@ -5,6 +5,9 @@ from Solvers import wgs
 
 
 class TimeDataset(Dataset):
+    '''
+    outputs points, changes, activations, pressures
+    '''
     def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None):
         self.length = length #Number of point sets in the Dataset (length)
         self.timestamps = timestamps #number of changes in an element
