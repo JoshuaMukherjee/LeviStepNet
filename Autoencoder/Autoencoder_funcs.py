@@ -1,3 +1,4 @@
+from distutils.command.sdist import sdist
 import torch
 
 
@@ -25,7 +26,9 @@ def scale_stack_to_vector(x):
     real = AE_var(x)
     vect = torch.reshape(real,(x.shape[0],-1))
     vect -= vect.mean(0, keepdim=True)
-    vect /= vect.std(0, unbiased=False, keepdim=True)
+    sd =vect.std(0, unbiased=False, keepdim=True)
+    if sd != 0:
+        vect /= sd
     return vect
 
 
