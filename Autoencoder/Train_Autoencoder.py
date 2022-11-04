@@ -58,7 +58,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, sche
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
 
-            print(epoch+start_epochs,"Training",running, "Testing", running_test, "Time", time.asctime(), "Start", start_time)
+            print(name,epoch+start_epochs,"Training",running, "Testing", running_test, "Time", time.asctime(), "Start", start_time)
             torch.save(net,'Autoencoder/Autoencoders/'+ str(name) + '.pth')
             loss_to_dump = (losses, losses_test)
             pickle.dump(loss_to_dump, open('Autoencoder/Autoencoderlosses/'+ str(name) + '.pth',"wb"))
