@@ -24,6 +24,7 @@
     "scheduler":"CyclicLR",
     "scheduler-args":{"base_lr":1e-5,
                         "max_lr":1e-3,
-                        "step_size_up":5
+                        "step_size_up":5,
+                        "cycle_momentum":false
                     }
 }
