@@ -53,6 +53,7 @@ def parse(params,name):
 
 for file in files:
     try:
+        print(file, "Parsing....")
         params = json.load(open("Params/"+file+".json","r"))
         parse(params,file)
     except Exception as e:

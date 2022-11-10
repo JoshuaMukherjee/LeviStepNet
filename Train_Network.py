@@ -7,7 +7,7 @@ from Utlilities import *
 
 
 def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supervised, scheduler, name, batch ):
-    print(name)
+    print(name, "Training....")
     start_time = time.asctime()
     losses = []
     losses_test = []
