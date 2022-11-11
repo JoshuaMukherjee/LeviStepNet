@@ -1,3 +1,4 @@
+from sklearn import datasets
 import torch
 from torch.utils.data import Dataset
 from Utlilities import *
@@ -40,13 +41,13 @@ class TimeDataset(Dataset):
             
 
             pressures = torch.zeros((self.timestamps,self.N)) + 0j
-            activations = torch.zeros(self.timestamps,512,1) + 0j
+            activations = torch.zeros(self.timestamps,512) + 0j
             
             for i,points in enumerate(time_series):
                 A=forward_model(points, transducers()).to(device)
                 _, _, x = wgs(A,torch.ones(self.N,1).to(device)+0j,200)
                 pressures[i] = A@x[:,0]
-                activations[i] = x
+                activations[i] = x[:,0]
             self.pressures.append(pressures)
             self.activations.append(activations)
 
@@ -73,3 +74,13 @@ if __name__ == "__main__":
         torch.save(test,"Datasets/Test-"+str(timestamps)+"-"+str(test_length)+"-"+str(N)+".pth")
     
    
+    # dataset = TimeDataset(10,2)
+    # from torch.utils.data import DataLoader
+    # data = DataLoader(dataset)
+    # p,c,a,pr = next(iter(data))
+    # print(a[:,0,:].shape)
+    # # i = 1
+    # # print(torch.abs(propagate(a[:,i,:],p[:,i,:])))
+    # # print(p)
+    # # print(torch.abs(pr))
+
