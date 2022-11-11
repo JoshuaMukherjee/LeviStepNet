@@ -21,7 +21,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
             net.train()
             for training_dataset in train:
                 for points, changes, activations, pressures in iter(training_dataset):                    
-                    activation_init = activations[:,0,:,:]
+                    activation_init = activations[:,0,:]
                     net.init(activation_init)
                     
                     for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
@@ -29,7 +29,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
                         optimiser.zero_grad()
                         
                         activation_out = net(change)
-                        pressure_out = torch.abs(propagate(activation_out,points[:,i,:,:]))
+                        pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
                         if supervised:
                             loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
                         else:
@@ -39,7 +39,6 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
 
                         loss.backward()
                         optimiser.step()
-                        loss = 0
             
             if scheduler is not None:
                 if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
@@ -52,7 +51,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
             running_test = 0
             for test_dataset in test:
                 for points, changes, activations, pressures in iter(test_dataset):                    
-                    activation_init = activations[:,0,:,:]
+                    activation_init = activations[:,0,:]
                     net.init(activation_init)
                     
                     for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
@@ -61,7 +60,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
                         activation_out = net(change)
                         pressure_out = torch.abs(propagate(activation_out,points[:,i,:,:]))
                         if supervised:
-                            loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
+                            loss = loss_function(pressure_out,torch.abs(pressures[:,i,:])[0,:])
                         else:
                             loss = loss_function(torch.abs(pressures[:,i,:]))
                         

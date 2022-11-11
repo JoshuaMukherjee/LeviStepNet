@@ -16,7 +16,7 @@ class PointNet(Module):
                     output_funct=None, output_funct_args = {}
                 ):
         super(PointNet,self).__init__()
-        self.layers = []
+        self.layers = torch.nn.ModuleList()
         self.sym_function = sym_function(**sym_args)
         if output_funct is not None:
             self.output_funct = output_funct(**output_funct_args)
@@ -164,18 +164,19 @@ class MLP(Module):
             
     def forward(self,x):
         out = x
+        # print()
         for layer in self.layers:
             out = layer(out)
-           
+            # print(out)
         return out
 
 if __name__ == "__main__":
 
     layers = [100,200,400,300]
-    act = ["ReLU", "GELU", "SELU","Sigmoid"]
+    act = "ELU"
     bn = torch.nn.BatchNorm1d
     net = MLP(layers,activation=act,batch_norm=bn)
-
+    print(net)
     point = torch.ones((2,512))
     print(point)
     net(point)
@@ -190,7 +191,7 @@ if __name__ == "__main__":
     # layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
     # norm = torch.nn.BatchNorm1d
     # net = PointNet(layers,batch_norm=norm)
-    # print(net.layers)
+    # print(net)
 
     # data = TimeDataset(5,4)
     # points = DataLoader(data,2,shuffle=True)
@@ -202,15 +203,15 @@ if __name__ == "__main__":
     #     change = changes[:,i,:,:] #Get batch
     #     out = net(change)
     #     p=points[:,i,:,:]
-    #     print(swap_output_to_activations(out,p))
-    #     # print(out)
-    #     # print(out.shape)
+    #     # print(swap_output_to_activations(out,p))
+    #     print(out)
+    #     print(out.shape)
 
-    #     # permed = perm[:,i,:,:]
-    #     # perm_out = net(change)
-    #     # print(torch.all(perm_out == out))
-    #     # print(torch.all(permed==change))
+    #     permed = perm[:,i,:,:]
+    #     perm_out = torch.sum(net(permed))
+    #     print(torch.all(perm_out == torch.sum(out))) #Should be True
+    #     # print(torch.all(permed==change)) 
 
-    #     # rand = torch.rand_like(change)
-    #     # rand_out = net(rand)
-    #     # print(torch.all(rand_out == out))
+        # rand = torch.rand_like(change)
+        # rand_out = net(rand)
+        # print(torch.all(rand_out == out))

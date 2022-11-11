@@ -1,3 +1,4 @@
+from cmath import nan
 from torch.nn import Module
 import torch
 
@@ -13,7 +14,8 @@ class Updater(Module):
 
         self.memory = None
         self.points = None
-
+    
+        print(self)
 
     def init(self,start_activations):
         self.memory = start_activations
@@ -23,15 +25,13 @@ class Updater(Module):
         if self.memory is None:
             raise Exception("memory not initialised")
 
-
-        z = self.encoder(torch.abs(self.memory[:,:,0]))
-        N = changes.shape[2]
+        z = self.encoder(torch.abs(self.memory))
+        N = changes.shape[2] 
         z_expand = torch.Tensor.expand(z.unsqueeze_(2),-1,-1,N)
         out = torch.cat((changes,z_expand),dim=1)
         out = self.network(out) #1024 x N
         out = convert_to_complex(out)
-        out = torch.sum(out,dim=2).unsqueeze_(2)
-        
+        out = torch.sum(out,dim=2)
         self.memory = self.memory + out
         return self.memory
 
@@ -54,15 +54,14 @@ if __name__ == "__main__":
     data = TimeDataset(2,4)
     points = DataLoader(data,2,shuffle=True)
     points,changes,activation,pressures = next(iter(points))
-    updater.init(torch.rand((2,512)),points[:,0,:,:])
+    updater.init(activation[:,0,:])
 
     for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
         change = changes[:,i,:,:] #Get batch
-        x=updater(change)[0] +0j
-        print(x)
+        x=updater(change)
         point = points[:,i,:,:]
-        print(torch.abs(pressures))
-        print(point[0])
+        # print(torch.abs(pressures))
 
-        print(torch.abs(propagate(x,point[0])))
+        print(torch.abs(propagate(x,point)))
+        break
   
