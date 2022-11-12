@@ -15,8 +15,6 @@ class Updater(Module):
         self.memory = None
         self.points = None
     
-        print(self)
-
     def init(self,start_activations):
         self.memory = start_activations
 
