@@ -1,4 +1,3 @@
-from sklearn import datasets
 import torch
 from torch.utils.data import Dataset
 from Utlilities import *
