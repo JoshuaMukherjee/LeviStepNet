@@ -55,6 +55,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
     try:   
         for epoch in range(epochs):
             running = do_network(net, optimiser, loss_function, train, scheduler=scheduler, supervised=supervised)
+            
             running_test = do_network(net, optimiser, loss_function, test, test=True, supervised=supervised)
             
             losses.append(running) #Store each epoch's losses 
