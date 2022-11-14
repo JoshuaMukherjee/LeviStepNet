@@ -6,6 +6,45 @@ from Symmetric_Functions import SymSum
 from Utlilities import *
 
 
+def do_network(net, optimiser,loss_function, datasets, test=False, supervised=True, scheduler = None):
+    #TRAINING
+    running = 0
+    loss = 0
+    if not test:
+        net.train()
+    else:
+        net.eval()
+    for training_dataset in datasets:
+        for points, changes, activations, pressures in iter(training_dataset):                    
+            activation_init = activations[:,0,:]
+            net.init(activation_init)
+            
+            for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
+                change = changes[:,i,:,:] #Get batch
+                if not test:
+                    optimiser.zero_grad()
+                
+                activation_out = net(change)
+                pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
+                if supervised:
+                    loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
+                else:
+                    loss = loss_function(torch.abs(pressures[:,i,:]))
+                
+                running += loss.item()
+                if not test:
+                    loss.backward()
+                    optimiser.step()
+    if not test:
+        if scheduler is not None:
+            if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
+                scheduler.step(running)
+            else:
+                scheduler.step()
+    return running
+
+
+
 def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supervised, scheduler, name, batch ):
     print(name, "Training....")
     start_time = time.asctime()
@@ -13,59 +52,10 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
     losses_test = []
 
 
-    try:
+    try:   
         for epoch in range(epochs):
-            #TRAINING
-            running = 0
-            loss = 0
-            net.train()
-            for training_dataset in train:
-                for points, changes, activations, pressures in iter(training_dataset):                    
-                    activation_init = activations[:,0,:]
-                    net.init(activation_init)
-                    
-                    for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
-                        change = changes[:,i,:,:] #Get batch
-                        optimiser.zero_grad()
-                        
-                        activation_out = net(change)
-                        pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
-                        if supervised:
-                            loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
-                        else:
-                            loss = loss_function(torch.abs(pressures[:,i,:]))
-                        
-                        running += loss.item()
-
-                        loss.backward()
-                        optimiser.step()
-            
-            if scheduler is not None:
-                if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
-                    scheduler.step(running)
-                else:
-                    scheduler.step()
-            
-            #TESTING
-            net.eval()
-            running_test = 0
-            for test_dataset in test:
-                for points, changes, activations, pressures in iter(test_dataset):                    
-                    activation_init = activations[:,0,:]
-                    net.init(activation_init)
-                    
-                    for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
-                        change = changes[:,i,:,:] #Get batch
-                        
-                        activation_out = net(change)
-                        pressure_out = torch.abs(propagate(activation_out,points[:,i,:,:]))
-                        if supervised:
-                            loss = loss_function(pressure_out,torch.abs(pressures[:,i,:])[0,:])
-                        else:
-                            loss = loss_function(torch.abs(pressures[:,i,:]))
-                        
-                        running_test += loss.item()
-                        loss = 0
+            running = do_network(net, optimiser, loss_function, train, scheduler=scheduler, supervised=supervised)
+            running_test = do_network(net, optimiser, loss_function, test, test=True, supervised=supervised)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
