@@ -34,7 +34,7 @@ def parse(params,name):
 
     batch = params["batch"]
     train_sets = [DataLoader(d,batch,shuffle=True) for d in train_s]
-    test_sets = [DataLoader(d,1,shuffle=True) for d in test_s]
+    test_sets = [DataLoader(d,batch,shuffle=True) for d in test_s]
 
     optimiser = getattr(torch.optim, params["optimiser"])(updater.parameters(),**params["optimiser-args"])
     loss_function = getattr(Loss_Functions, params["loss-function"])

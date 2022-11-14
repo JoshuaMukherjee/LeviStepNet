@@ -54,14 +54,15 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
 
     try:   
         for epoch in range(epochs):
+            #Train
             running = do_network(net, optimiser, loss_function, train, scheduler=scheduler, supervised=supervised)
-            
+            #Test
             running_test = do_network(net, optimiser, loss_function, test, test=True, supervised=supervised)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
 
-            print(name, epoch+start_epochs,"Training",running, "Testing", running_test, "Time", time.asctime(), "Start", start_time)
+            print(name,epoch+start_epochs,"Training",running,"Testing",running_test,"Time",time.asctime(),"Start",start_time)
             torch.save(net, 'Models/model_' + str(name) + '.pth')
             loss_to_dump = (losses, losses_test)
             pickle.dump(loss_to_dump, open("Losses/loss_"+ str(name) +'.pth',"wb"))
