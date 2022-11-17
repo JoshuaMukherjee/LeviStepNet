@@ -83,15 +83,14 @@ class TimeDatasetAtomic(Dataset):
             p = torch.FloatTensor(3,self.N).uniform_(-.06,.06).to(device)
             changes = []
             for t in range(timestamps):
-                change = torch.zeros(3,self.N)
-                index_x = torch.randint(low=0,high=change.shape[0],size=(1,)).item()
-                index_y = torch.randint(low=0,high=change.shape[1],size=(1,)).item()
+                change = torch.zeros(3,self.N).to(device)
+                index_x = torch.randint(low=0,high=change.shape[0],size=(1,)).to(device).item()
+                index_y = torch.randint(low=0,high=change.shape[1],size=(1,)).to(device).item()
                 change[index_x,index_y] = self.movement
                 changes.append(change)
-            changes = torch.stack(changes)
+            changes = torch.stack(changes).to(device)
             changes[0,:,:] = 0
-            changes[0,:,:] = 0
-            time_series = torch.zeros_like(changes)
+            time_series = torch.zeros_like(changes).to(device)
             change = 0
             for j,dxyz in enumerate(changes):
                 change += dxyz
