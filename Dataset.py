@@ -65,7 +65,7 @@ class TimeDatasetAtomic(Dataset):
     '''
     outputs points, changes, activations, pressures
     '''
-    def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None,movement=0.01):
+    def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None,movement=0.001):
         self.length = length #Number of point sets in the Dataset (length)
         self.timestamps = timestamps #number of changes in an element
         self.N = N #Number of points per set
