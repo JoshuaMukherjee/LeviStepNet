@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from Train_Network import train
 import Networks, Updater, Loss_Functions
 from Utlilities import device
-from Dataset import TimeDataset
+from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
