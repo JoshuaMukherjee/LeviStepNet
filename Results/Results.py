@@ -17,12 +17,14 @@ from Dataset import TimeDataset
 args = sys.argv
 BOXPLOTS = False
 LOSS = False
+HELP = False
 
 try:
     path = args[1]
     net = torch.load("SavedModels/"+path+"/"+"model_"+path+".pth",map_location=device)
     BOXPLOTS = "-p" in args
     LOSS = "-l" in args
+    HELP = "-h" in args
 
 
 except IndexError:
@@ -58,7 +60,6 @@ if BOXPLOTS:
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))
     train,test = loss
-    print(test,train)
     plt.plot(train,label="train")
     plt.plot(test,label="test")
     plt.yscale("log")
@@ -66,3 +67,9 @@ if LOSS:
     plt.xlabel("epoch")
     plt.ylabel("loss")
     plt.show()
+
+
+if HELP:
+    print("-h, help")
+    print("-p, boxplots")
+    print("-l, losses")
