@@ -12,7 +12,7 @@ from Dataset import TimeDataset
 
 
 files = [
-    "Updater7"
+    "Updater8","Updater9","Updater10"
 ]
 
 
