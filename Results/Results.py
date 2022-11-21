@@ -18,6 +18,7 @@ args = sys.argv
 BOXPLOTS = False
 LOSS = False
 HELP = False
+MAX_LOSS = False
 
 try:
     path = args[1]
@@ -25,7 +26,7 @@ try:
     BOXPLOTS = "-p" in args
     LOSS = "-l" in args
     HELP = "-h" in args
-
+    MAX_LOSS = "-m" in args
 
 except IndexError:
     print("Invalid Arguments")
@@ -68,8 +69,40 @@ if LOSS:
     plt.ylabel("loss")
     plt.show()
 
+if MAX_LOSS:
+    from Loss_Functions import max_loss
+    dataset = TimeDataset(50,2)
+    data = iter(DataLoader(dataset,1,shuffle=True))
+    
+    N = 50
+
+    losses = []
+
+    for i in range(N):
+        p,c,a,pr = next(data)
+        activation_init = a[:,0,:]
+        net.init(activation_init)
+        change = c[:,1,:,:] #Get batch
+        activation_out = net(change)
+        pressure_out = torch.abs(propagate(activation_out,p[:,1,:]))
+        loss = max_loss(pressure_out,torch.abs(pr[:,1]))
+        losses.append(loss)
+    
+    losses = [l.detach().numpy() for l in losses]
+
+    print(losses)
+    # plt.bar([i for i in range(len(losses))],losses)
+    plt.hist(losses,bins=20)
+    plt.title("Max loss Loss of pressure at points")
+    plt.xlabel("Max Loss")
+    plt.ylabel("Frequency")
+    plt.show()
+
+    
+
 
 if HELP:
     print("-h, help")
     print("-p, boxplots")
     print("-l, losses")
+    print("-m", "max loss")
