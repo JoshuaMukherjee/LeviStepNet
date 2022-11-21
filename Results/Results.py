@@ -67,6 +67,14 @@ if LOSS:
     plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("loss")
+
+    try:
+        max_epoch = net.epoch_saved
+        plt.plot(max_epoch,test[max_epoch],"x")
+    except AttributeError:
+        pass
+
+
     plt.show()
 
 if MAX_LOSS:
@@ -103,6 +111,6 @@ if MAX_LOSS:
 
 if HELP:
     print("-h, help")
-    print("-p, boxplots")
+    print("-p, pressures")
     print("-l, losses")
     print("-m", "max loss")
