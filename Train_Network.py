@@ -50,6 +50,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
     start_time = time.asctime()
     losses = []
     losses_test = []
+    best_test = torch.inf
 
 
     try:   
@@ -62,8 +63,14 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
 
-            print(name,epoch+start_epochs,"Training",running,"Testing",running_test,"Time",time.asctime(),"Start",start_time)
-            torch.save(net, 'Models/model_' + str(name) + '.pth')
+            print(name,epoch+start_epochs,"Training",running,"Testing",running_test,"Time",time.asctime(),"Start",start_time, end=" ")
+            if running_test < best_test: #Only save if the best 
+                net.epoch_saved = epoch
+                torch.save(net, 'Models/model_' + str(name) + '.pth')
+                best_test = running_test
+                print("SAVED")
+            else:
+                print()
             loss_to_dump = (losses, losses_test)
             pickle.dump(loss_to_dump, open("Losses/loss_"+ str(name) +'.pth',"wb"))
 

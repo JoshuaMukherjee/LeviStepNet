@@ -14,6 +14,8 @@ class Updater(Module):
 
         self.memory = None
         self.points = None
+
+        self.epoch_saved = 0
     
     def init(self,start_activations):
         self.memory = start_activations
