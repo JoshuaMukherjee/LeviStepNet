@@ -17,7 +17,7 @@
     "epochs":100,
     "train":["Train-2-120000-4A.pth"],
     "test":["Test-2-5000-4A.pth"],
-    "optimiser":"WAdam",
+    "optimiser":"AdamW",
     "optimiser-args":{"lr":1e-4},
     "loss-function":"max_loss",
     "supervised":true,
