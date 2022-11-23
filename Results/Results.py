@@ -12,7 +12,7 @@ sys.path.insert(1, p)
 from Utlilities import *
 from Updater import Updater
 from Networks import PointNet, MLP
-from Dataset import TimeDataset
+from Dataset import TimeDataset, TimeDatasetAtomic
 
 args = sys.argv
 BOXPLOTS = False
@@ -32,10 +32,10 @@ except IndexError:
     print("Invalid Arguments")
 
 if BOXPLOTS:
-    dataset = TimeDataset(10,2)
+    dataset = TimeDatasetAtomic(10,2)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
-    N = 5
+    N = 10
 
     pressures = []
 
@@ -79,10 +79,10 @@ if LOSS:
 
 if MAX_LOSS:
     from Loss_Functions import max_loss
-    dataset = TimeDataset(50,2)
+    N = 50
+    dataset = TimeDatasetAtomic(N,2)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
-    N = 50
 
     losses = []
 
