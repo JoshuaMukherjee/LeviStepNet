@@ -7,4 +7,5 @@ Datasets/*
 Autoencoder/Autoencoders/*
 Autoencoder/Autoencoderlosses/*
 SavedModels/*
+log.txt
 *.sh
