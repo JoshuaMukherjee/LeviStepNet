@@ -26,7 +26,7 @@ def do_network(net, optimiser,loss_function, datasets, constrain_amp,test=False,
                 
                 activation_out = net(change)
                 if constrain_amp:
-                    activation_out /= torch.abs(activation_out)
+                    activation_out = activation_out /  torch.abs(activation_out)
                 pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
                 if supervised:
                     loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
