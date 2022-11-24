@@ -14,8 +14,8 @@ def do_network(net, optimiser,loss_function, datasets,test=False, supervised=Tru
         net.train()
     else:
         net.eval()
-    for training_dataset in datasets:
-        for points, changes, activations, pressures in iter(training_dataset):                    
+    for dataset in datasets:
+        for points, changes, activations, pressures in iter(dataset):                    
             activation_init = activations[:,0,:]
             net.init(activation_init)
             
