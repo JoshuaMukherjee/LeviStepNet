@@ -35,7 +35,7 @@ class Updater(Module):
         out = convert_to_complex(out)
         out = torch.sum(out,dim=2)
         self.memory = self.memory + out
-        if self.constrain_amp:
+        if "constrain_amp" in self.__dict__ and self.constrain_amp: #Backwards compatability - not very neat
             self.memory = self.memory / torch.abs(self.memory)
         return self.memory
 
