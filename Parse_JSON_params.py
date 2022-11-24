@@ -48,7 +48,7 @@ def parse(params,name):
     batch = params["batch"]
 
     if "constrain_amp" in params:
-        constrain_amp = params[constrain_amp]
+        constrain_amp = params["constrain_amp"]
     else:
         constrain_amp = False
 
