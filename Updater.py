@@ -6,7 +6,7 @@ from Utlilities import convert_to_complex, device
 
 
 class Updater(Module):
-    def __init__(self,network,encoder):
+    def __init__(self,network,encoder,constrain_amp=False):
         super(Updater,self).__init__()
 
         self.network = network
@@ -16,6 +16,8 @@ class Updater(Module):
         self.points = None
 
         self.epoch_saved = 0
+
+        self.constrain_amp = constrain_amp
     
     def init(self,start_activations):
         self.memory = start_activations
@@ -33,6 +35,8 @@ class Updater(Module):
         out = convert_to_complex(out)
         out = torch.sum(out,dim=2)
         self.memory = self.memory + out
+        if self.constrain_amp:
+            self.memory = self.memory / torch.abs(self.memory)
         return self.memory
 
 

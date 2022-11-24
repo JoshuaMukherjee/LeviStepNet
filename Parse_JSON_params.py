@@ -24,7 +24,8 @@ def parse(params,name):
     if start_epochs == 0:
         net = getattr(Networks, params["net"])(**params["net-args"]).to(device)
         encoder = getattr(Networks, params["encoder"])(**params["encoder-args"]).to(device)
-        updater = getattr(Updater,params["updater"])(net,encoder).to(device)
+        updater_args = params["updater-args"] if "updater-args" in params else {}
+        updater = getattr(Updater,params["updater"])(net,encoder,**updater_args).to(device)
     else:
         updater = torch.load(name+".pth",map_location=torch.device(device))
 
@@ -47,13 +48,7 @@ def parse(params,name):
     
     batch = params["batch"]
 
-    if "constrain_amp" in params:
-        constrain_amp = params["constrain_amp"]
-    else:
-        constrain_amp = False
-
-
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function, supervised, scheduler, name, batch,constrain_amp)
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function, supervised, scheduler, name, batch)
 
 
 for file in files:
