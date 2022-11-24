@@ -6,7 +6,7 @@ from Symmetric_Functions import SymSum
 from Utlilities import *
 
 
-def do_network(net, optimiser,loss_function, datasets, test=False, supervised=True, scheduler = None):
+def do_network(net, optimiser,loss_function, datasets, constrain_amp,test=False, supervised=True, scheduler = None):
     #TRAINING
     running = 0
     loss = 0
@@ -25,6 +25,8 @@ def do_network(net, optimiser,loss_function, datasets, test=False, supervised=Tr
                     optimiser.zero_grad()
                 
                 activation_out = net(change)
+                if constrain_amp:
+                    activation_out /= torch.abs(activation_out)
                 pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
                 if supervised:
                     loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]))
@@ -45,7 +47,7 @@ def do_network(net, optimiser,loss_function, datasets, test=False, supervised=Tr
 
 
 
-def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supervised, scheduler, name, batch ):
+def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supervised, scheduler, name, batch,constrain_amp ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -56,9 +58,9 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
     try:   
         for epoch in range(epochs):
             #Train
-            running = do_network(net, optimiser, loss_function, train, scheduler=scheduler, supervised=supervised)
+            running = do_network(net, optimiser, loss_function, train, scheduler=scheduler, supervised=supervised,constrain_amp=constrain_amp)
             #Test
-            running_test = do_network(net, optimiser, loss_function, test, test=True, supervised=supervised)
+            running_test = do_network(net, optimiser, loss_function, test, test=True, supervised=supervised,constrain_amp=constrain_amp)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)

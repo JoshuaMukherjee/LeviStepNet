@@ -47,8 +47,13 @@ def parse(params,name):
     
     batch = params["batch"]
 
+    if "constrain_amp" in params:
+        constrain_amp = params[constrain_amp]
+    else:
+        constrain_amp = False
 
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function, supervised, scheduler, name, batch)
+
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function, supervised, scheduler, name, batch,constrain_amp)
 
 
 for file in files:

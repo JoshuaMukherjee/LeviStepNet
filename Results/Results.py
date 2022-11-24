@@ -1,6 +1,7 @@
 import os,sys
 import torch,pickle
 from torch.utils.data import DataLoader 
+import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -19,6 +20,7 @@ BOXPLOTS = False
 LOSS = False
 HELP = False
 MAX_LOSS = False
+ACTIVATIONS = False
 
 try:
     path = args[1]
@@ -27,6 +29,7 @@ try:
     LOSS = "-l" in args
     HELP = "-h" in args
     MAX_LOSS = "-m" in args
+    ACTIVATIONS = "-a" in args
 
 except IndexError:
     print("Invalid Arguments")
@@ -44,7 +47,7 @@ if BOXPLOTS:
         activation_init = a[:,0,:]
         net.init(activation_init)
         change = c[:,1,:,:] #Get batch
-        activation_out = net(change)
+        activation_out = net(change) 
         pressure_out = torch.abs(propagate(activation_out,p[:,1,:]))
         pressures.append(pressure_out)
 
@@ -107,10 +110,44 @@ if MAX_LOSS:
     plt.show()
 
     
+if ACTIVATIONS:
+    N = 5
+    dataset = TimeDatasetAtomic(N,2)
+    data = iter(DataLoader(dataset,1,shuffle=True))
+    
 
+
+
+    p,c,a,pr = next(data)
+    activation_init = a[:,0,:]
+    net.init(activation_init)
+    change = c[:,1,:,:] #Get batch
+    activation_out = net(change).detach().numpy()
+    a = a.detach().numpy()
+    print(activation_out.shape)
+    print(a[:,1,:].shape)
+
+
+    x = [i.real for i in activation_out]
+    y = [i.imag for i in activation_out]
+
+    x_a = [i.real for i in a[:,1,:]]
+    y_a = [i.imag for i in a[:,1,:]]
+
+
+    plt.plot(x,y,"o",color="blue")
+    plt.plot(x_a,y_a,"o",color="red")
+    plt.xlabel("Real")
+    plt.ylabel("Imag")
+    plt.show()
+
+
+
+    
 
 if HELP:
     print("-h, help")
     print("-p, pressures")
     print("-l, losses")
-    print("-m", "max loss")
+    print("-m, max loss")
+    print("-a, activations")
