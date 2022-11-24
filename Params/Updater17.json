@@ -21,9 +21,10 @@
     "optimiser-args":{"lr":1e-4},
     "loss-function":"max_loss",
     "supervised":true,
+    "constrain_amp":true,
     "batch":16,
     "scheduler":"CyclicLR",
-    "scheduler-args":{"base_lr":1e-6,
+    "scheduler-args":{"base_lr":1e-5,
                         "max_lr":1e-4,
                         "step_size_up":5,
                         "cycle_momentum":false
