@@ -35,12 +35,13 @@ except IndexError:
     print("Invalid Arguments")
 
 if BOXPLOTS:
-    dataset = TimeDatasetAtomic(10,2)
+    dataset = TimeDatasetAtomic(10,2,N=4)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
     N = 10
 
     pressures = []
+    true = []
 
     for i in range(N):
         p,c,a,pr = next(data)
@@ -50,15 +51,19 @@ if BOXPLOTS:
         activation_out = net(change) 
         pressure_out = torch.abs(propagate(activation_out,p[:,1,:]))
         pressures.append(pressure_out)
+        true.append(np.abs(pr[:,1,:].numpy())[0])
 
 
     pressures = [p.detach().numpy() for p in pressures]
 
     print(pressures)
-    plt.boxplot(pressures)
+    SPACING = 0.45
+    tplot = plt.boxplot(true,positions=np.linspace(0,len(true)-1,len(true)),widths=0.4)
+    pplot = plt.boxplot(pressures,positions=np.linspace(0,len(true)-1,len(true))-SPACING,widths=0.4)
     plt.title("Pressures at points")
-    plt.xlabel("Point")
+    plt.xlabel("Point Set")
     plt.ylabel("P")
+    plt.xticks(np.linspace(0,len(true)-1,len(true))-(SPACING/2))
     plt.show()
 
 if LOSS:
