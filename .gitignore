@@ -8,3 +8,4 @@ Autoencoder/Autoencoderlosses/*
 SavedModels/*
 log.txt
 *.sh
+.DS_Store
