@@ -116,7 +116,8 @@ class TimeDatasetAtomic(Dataset):
 
             if batch % 200 == 0:
                 print(batch,end=" ",flush=True)
-    
+
+        print()
     def __len__(self):
         return self.length
 
