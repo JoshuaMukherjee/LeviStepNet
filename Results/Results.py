@@ -24,7 +24,10 @@ ACTIVATIONS = False
 
 try:
     path = args[1]
-    net = torch.load("SavedModels/"+path+"/"+"model_"+path+".pth",map_location=device)
+    if "-latest" not in args:
+        net = torch.load("SavedModels/"+path+"/"+"model_"+path+".pth",map_location=device)
+    else:
+        net = torch.load("SavedModels/"+path+"/"+"model_"+path+"_latest.pth",map_location=device)
     BOXPLOTS = "-p" in args
     LOSS = "-l" in args
     HELP = "-h" in args
