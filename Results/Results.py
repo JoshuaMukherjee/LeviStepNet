@@ -35,10 +35,10 @@ except IndexError:
     print("Invalid Arguments")
 
 if BOXPLOTS:
-    dataset = TimeDatasetAtomic(10,2,N=4)
+    N = 10
+    dataset = TimeDatasetAtomic(N,2,N=4)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
-    N = 10
 
     pressures = []
     true = []
