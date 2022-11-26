@@ -71,6 +71,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, supe
                 print("SAVED")
             else:
                 print()
+            torch.save(net, 'Models/model_' + str(name) + '_latest.pth') #save the newest model too
             loss_to_dump = (losses, losses_test)
             pickle.dump(loss_to_dump, open("Losses/loss_"+ str(name) +'.pth',"wb"))
 
