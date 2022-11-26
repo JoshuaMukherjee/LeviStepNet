@@ -56,7 +56,8 @@ if BOXPLOTS:
 
     pressures = [p.detach().numpy() for p in pressures]
 
-    print(pressures)
+    for i,p in enumerate(pressures):
+        print(i,p,"sd",np.std(p),"mean",np.mean(p))
     SPACING = 0.45
     tplot = plt.boxplot(true,positions=np.linspace(0,len(true)-1,len(true)),widths=0.4)
     pplot = plt.boxplot(pressures,positions=np.linspace(0,len(true)-1,len(true))-SPACING,widths=0.4)
