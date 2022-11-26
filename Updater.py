@@ -17,7 +17,7 @@ class Updater(Module):
 
         self.epoch_saved = 0
 
-        self.constrain_amp = constrain_amp
+        self.constrain_amp = constrain_amp #older versions didnt have this - load will not include this
     
     def init(self,start_activations):
         self.memory = start_activations
