@@ -64,7 +64,8 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
             losses_test.append(running_test)
 
             print(name,epoch+start_epochs,"Training",running,"Testing",running_test,"Time",time.asctime(),"Start",start_time, end=" ")
-            if running_test < best_test: #Only save if the best 
+            a = 1 if supervised else -1
+            if a*running_test < best_test: #Only save if the best 
                 net.epoch_saved = epoch
                 torch.save(net, 'Models/model_' + str(name) + '.pth')
                 best_test = running_test

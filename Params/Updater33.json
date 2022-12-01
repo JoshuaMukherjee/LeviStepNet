@@ -24,7 +24,7 @@
     "optimiser-args":{"lr":1e-4},
     "loss-function":"mean_std",
     "loss-params":{
-        "alpha":-0.01
+        "alpha":0.01
     },
     "supervised":false,
     "batch":16,
