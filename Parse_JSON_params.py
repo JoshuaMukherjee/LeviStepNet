@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-    "Updater32"
+    "Updater33"
 ]
 
 
@@ -39,6 +39,11 @@ def parse(params,name):
 
     optimiser = getattr(torch.optim, params["optimiser"])(updater.parameters(),**params["optimiser-args"])
     loss_function = getattr(Loss_Functions, params["loss-function"])
+    if "loss-params" in params:
+        loss_params = params["loss-params"]
+    else:
+        loss_params = {}
+    
     supervised = params["supervised"]
    
     if "scheduler" in params:
@@ -48,7 +53,7 @@ def parse(params,name):
     
     batch = params["batch"]
 
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function, supervised, scheduler, name, batch)
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch)
 
 
 for file in files:
