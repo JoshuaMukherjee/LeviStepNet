@@ -15,6 +15,6 @@ def mean_std(output,alpha=-0.01):
     dim = 1
   else:
     dim = 0
-  m = torch.mean(output,dim) + alpha*torch.std(output,dim) 
+  m = -1 * (torch.mean(output,dim) + alpha*torch.std(output,dim) )
   return torch.sum(m,0)
   
