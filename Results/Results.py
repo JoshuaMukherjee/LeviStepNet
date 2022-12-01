@@ -73,6 +73,8 @@ if BOXPLOTS:
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))
     train,test = loss
+    train = np.abs(train)
+    test = np.abs(test)
     plt.plot(train,label="train")
     plt.plot(test,label="test")
     plt.yscale("log")
