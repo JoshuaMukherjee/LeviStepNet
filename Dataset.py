@@ -127,7 +127,7 @@ class TimeDatasetAtomic(Dataset):
 
 if __name__ == "__main__":
     timestamps = 2
-    length = 120000
+    length = 180000
     test_length = 0
     N = 4
     train = TimeDatasetAtomic(length,timestamps,N=N)
