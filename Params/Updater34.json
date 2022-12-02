@@ -18,7 +18,7 @@
     },
     "start-epochs":0,
     "epochs":100,
-    "train":["Train-2-120000-4A.pth"],
+    "train":["Train-2-180000-4A.pth"],
     "test":["Test-2-5000-4A.pth"],
     "optimiser":"NAdam",
     "optimiser-args":{"lr":1e-4},
