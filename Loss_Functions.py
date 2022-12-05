@@ -27,4 +27,8 @@ def cosine_accuracy(target, output):
     return torch.sqrt(torch.sum(torch.square(mat)))
   batch = target.shape[0]
   return 1 - (torch.sum(torch.bmm(target.view(batch, 1, -1),output.view(batch, -1, 1))) / (bottom(target) * bottom(output)))
-  
+
+def mean_cosine_similarity(target, output, **loss_params):
+  cos = torch.nn.CosineSimilarity(**loss_params)
+  loss = cos(target, output)
+  return torch.mean(loss)
