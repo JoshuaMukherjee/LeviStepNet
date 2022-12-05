@@ -18,3 +18,13 @@ def mean_std(output,alpha=0.01):
   m = -1 * (torch.mean(output,dim) - alpha*torch.std(output,dim) )
   return torch.sum(m,0)
   
+
+def cosine_accuracy(target, output):
+  """
+  From Deep learning-based framework for fast and accurate acoustic hologram generation
+  """
+  def bottom(mat):
+    return torch.sqrt(torch.sum(torch.square(mat)))
+  batch = target.shape[0]
+  return 1 - (torch.sum(torch.bmm(target.view(batch, 1, -1),output.view(batch, -1, 1))) / (bottom(target) * bottom(output)))
+  
