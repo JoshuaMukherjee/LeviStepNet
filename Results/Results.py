@@ -21,6 +21,7 @@ LOSS = False
 HELP = False
 MAX_LOSS = False
 ACTIVATIONS = False
+TIME = False
 
 try:
     path = args[1]
@@ -33,6 +34,7 @@ try:
     HELP = "-h" in args
     MAX_LOSS = "-m" in args
     ACTIVATIONS = "-a" in args
+    TIME = "-t" in args
 
 except IndexError:
     print("Invalid Arguments")
@@ -73,11 +75,11 @@ if BOXPLOTS:
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))
     train,test = loss
-    train = np.abs(train)
-    test = np.abs(test)
+    # train = np.abs(train)
+    # test = np.abs(test)
     plt.plot(train,label="train")
     plt.plot(test,label="test")
-    plt.yscale("log")
+    plt.yscale("symlog")
     plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("loss")
@@ -152,7 +154,29 @@ if ACTIVATIONS:
     plt.ylabel("Imag")
     plt.show()
 
-
+if TIME:
+    N = 1
+    T = 100
+    dataset = TimeDatasetAtomic(N,T,N=4)
+    data = iter(DataLoader(dataset,1,shuffle=True))
+    means = []
+    stds = []
+    for p,c,a,pr in data:
+        activation_init = a[:,0,:]
+        net.init(activation_init)
+        for i in range(1,c.shape[1]):
+            change = c[:,i,:,:] #Get batch
+            activation_out = net(change)
+            pressure_out = torch.abs(propagate(activation_out,p[:,i,:]))
+            means.append(torch.mean(pressure_out))
+            stds.append(torch.std(pressure_out))
+    means = [m.detach().numpy() for m in means]
+    stds =  [s.detach().numpy() for s in stds]
+    plt.xlabel("Time")
+    plt.plot(means,label="Mean")
+    plt.plot(stds,label="Standard Deviation")
+    plt.legend()
+    plt.show()
 
     
 
