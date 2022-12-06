@@ -32,3 +32,9 @@ def mean_cosine_similarity(target, output, **loss_params):
   cos = torch.nn.CosineSimilarity(**loss_params)
   loss = cos(target, output)
   return torch.mean(loss)
+
+def log_pressure(target, output):
+  return torch.mean(torch.log(output**-1))
+
+def cos_log(target,output,alpha=0.1,**cos_loss_params):
+  return mean_cosine_similarity(target,output,**cos_loss_params) + alpha*log_pressure(target,output)
