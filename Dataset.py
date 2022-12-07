@@ -65,7 +65,7 @@ class TimeDatasetAtomic(Dataset):
     '''
     outputs points, changes, activations, pressures
     '''
-    def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None,movement=0.001):
+    def __init__(self,length,timestamps,N=4,threshold = 0.01,seed=None,sort_fun=None,movement=0.001,signed = True):
         self.length = length #Number of point sets in the Dataset (length)
         self.timestamps = timestamps #number of changes in an element
         self.N = N #Number of points per set
@@ -87,7 +87,7 @@ class TimeDatasetAtomic(Dataset):
                 index_x = torch.randint(low=0,high=change.shape[0],size=(1,)).to(device).item()
                 index_y = torch.randint(low=0,high=change.shape[1],size=(1,)).to(device).item()
                 sign = torch.randint(0,2,(1,1))
-                if sign:
+                if sign and signed:
                     s = -1
                 else:
                     s = 1
