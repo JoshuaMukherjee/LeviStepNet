@@ -86,7 +86,12 @@ class TimeDatasetAtomic(Dataset):
                 change = torch.zeros(3,self.N).to(device)
                 index_x = torch.randint(low=0,high=change.shape[0],size=(1,)).to(device).item()
                 index_y = torch.randint(low=0,high=change.shape[1],size=(1,)).to(device).item()
-                change[index_x,index_y] = self.movement
+                sign = torch.randint(0,2,(1,1))
+                if sign:
+                    s = -1
+                else:
+                    s = 1
+                change[index_x,index_y] = self.movement * s
                 changes.append(change)
             changes = torch.stack(changes).to(device)
             changes[0,:,:] = 0
@@ -141,6 +146,7 @@ if __name__ == "__main__":
 
 
     # dataset = TimeDatasetAtomic(10,2)
+    # print(dataset[0])
     # from torch.utils.data import DataLoader
     # data = DataLoader(dataset)
     # d = iter(data)
