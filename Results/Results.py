@@ -22,6 +22,7 @@ HELP = False
 MAX_LOSS = False
 ACTIVATIONS = False
 TIME = False
+SIGNED = True
 
 try:
     path = args[1]
@@ -35,13 +36,14 @@ try:
     MAX_LOSS = "-m" in args
     ACTIVATIONS = "-a" in args
     TIME = "-t" in args
+    SIGNED = not "-unsigned" in args
 
 except IndexError:
     print("Invalid Arguments")
 
 if BOXPLOTS:
     N = 10
-    dataset = TimeDatasetAtomic(N,2,N=4)
+    dataset = TimeDatasetAtomic(N,2,N=4,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
 
@@ -96,7 +98,7 @@ if LOSS:
 if MAX_LOSS:
     from Loss_Functions import max_loss
     N = 50
-    dataset = TimeDatasetAtomic(N,2)
+    dataset = TimeDatasetAtomic(N,2,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -125,7 +127,7 @@ if MAX_LOSS:
     
 if ACTIVATIONS:
     N = 5
-    dataset = TimeDatasetAtomic(N,2)
+    dataset = TimeDatasetAtomic(N,2,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -157,7 +159,7 @@ if ACTIVATIONS:
 if TIME:
     N = 1
     T = 100
-    dataset = TimeDatasetAtomic(N,T,N=4)
+    dataset = TimeDatasetAtomic(N,T,N=4,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
     stds = []
