@@ -131,9 +131,9 @@ class TimeDatasetAtomic(Dataset):
 
 
 if __name__ == "__main__":
-    timestamps = 2
-    length = 180000
-    test_length = 0
+    timestamps = 10
+    length = 18000
+    test_length = 1000
     N = 4
     train = TimeDatasetAtomic(length,timestamps,N=N)
     torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+"A.pth")
