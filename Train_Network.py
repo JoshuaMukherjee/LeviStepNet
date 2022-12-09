@@ -9,7 +9,6 @@ from Utlilities import *
 def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None):
     #TRAINING
     running = 0
-    loss = 0
     if not test:
         net.train()
     else:
@@ -20,6 +19,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             net.init(activation_init)
             
             for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
+                loss = 0
                 change = changes[:,i,:,:] #Get batch
                 if not test:
                     optimiser.zero_grad()
