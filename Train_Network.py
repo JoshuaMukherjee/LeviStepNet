@@ -14,27 +14,27 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
     else:
         net.eval()
     for dataset in datasets:
-        for points, changes, activations, pressures in iter(dataset):                    
+        for points, changes, activations, pressures in iter(dataset):  
+            loss = 0      
+            if not test:
+                optimiser.zero_grad()            
             activation_init = activations[:,0,:]
             net.init(activation_init)
             
             for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
-                loss = 0
                 change = changes[:,i,:,:] #Get batch
-                if not test:
-                    optimiser.zero_grad()
                 
                 activation_out = net(change)
                 pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
                 if supervised:
-                    loss = loss_function(pressure_out,torch.abs(pressures[:,i,:]),**loss_params)
+                    loss += loss_function(pressure_out,torch.abs(pressures[:,i,:]),**loss_params)
                 else:
-                    loss = loss_function(pressure_out,**loss_params)
+                    loss += loss_function(pressure_out,**loss_params)
                 
                 running += loss.item()
-        if not test:
-            loss.backward()
-            optimiser.step()
+            if not test:
+                loss.backward()
+                optimiser.step()
     if not test:
         if scheduler is not None:
             if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
