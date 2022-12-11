@@ -32,9 +32,9 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                     loss = loss_function(pressure_out,**loss_params)
                 
                 running += loss.item()
-                if not test:
-                    loss.backward()
-                    optimiser.step()
+        if not test:
+            loss.backward()
+            optimiser.step()
     if not test:
         if scheduler is not None:
             if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
