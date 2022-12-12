@@ -1,29 +1,32 @@
 {
     "net":"PointNet",
     "net-args":{
-        "layer_sets":[[64,64],[64,128,1024],[512,1024]],
+        "layer_sets":[[64,256],[256,512,1024],[512,512,512,512,1024]],
         "batch_norm":"BatchNorm1d",
         "input_size":23,
-        "activation":"SELU"
+        "activation":"Tanh"
     },
     "encoder":"MLP",
     "encoder-args":{
-        "layers":[256,20],
+        "layers":[256,64,20],
         "batch_norm":"BatchNorm1d",
-        "activation":"SELU"
+        "activation":"Tanh"
     },
     "updater":"Updater",
+    "updater-args":{
+        "constrain_amp":true
+    },
     "start-epochs":0,
-    "epochs":500,
-    "train":["Train-2-120000-4.pth"],
-    "test":["Test-2-5000-4.pth"],
+    "epochs":100,
+    "train":["Train-2-180000-4A.pth"],
+    "test":["Test-2-5000-4A.pth"],
     "optimiser":"NAdam",
-    "optimiser-args":{"lr":1e-3},
+    "optimiser-args":{"lr":1e-4},
     "loss-function":"max_loss",
     "supervised":true,
     "batch":16,
     "scheduler":"CyclicLR",
-    "scheduler-args":{"base_lr":1e-5,
+    "scheduler-args":{"base_lr":1e-6,
                         "max_lr":1e-3,
                         "step_size_up":5,
                         "cycle_momentum":false
