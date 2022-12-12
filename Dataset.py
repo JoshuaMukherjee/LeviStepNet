@@ -71,7 +71,7 @@ class TimeDatasetAtomic(Dataset):
         self.N = N #Number of points per set
         self.seed = seed #custom seed
         self.sort_fun = sort_fun #allows sorting the points within a set
-        self.threshold = threshold #The ammount a point can change by +/-
+        self.threshold = threshold #The ammount a point can change by +/- -> Unused, backcompatability with old code
         self.movement = movement #The amount to move a point per timestep
     
         self.points = []
