@@ -23,7 +23,7 @@
         "constrain_amp":true
     },
     "start-epochs":0,
-    "epochs":100,
+    "epochs":40,
     "train":["Train-2-180000-4A.pth"],
     "test":["Test-2-5000-4A.pth"],
     "optimiser":"NAdam",
