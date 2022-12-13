@@ -1,12 +1,13 @@
 from cmath import nan
 from torch.nn import Module
 import torch
+import torch.nn.functional as F
 
 from Utlilities import convert_to_complex, device
 
 
 class Updater(Module):
-    def __init__(self,network,encoder,constrain_amp=False):
+    def __init__(self,network,encoder,constrain_amp=False,norm=False):
         super(Updater,self).__init__()
 
         self.network = network
@@ -18,6 +19,7 @@ class Updater(Module):
         self.epoch_saved = 0
 
         self.constrain_amp = constrain_amp #older versions didnt have this - load will not include this
+        self.norm = norm
     
     def init(self,start_activations):
         self.memory = start_activations
@@ -31,6 +33,8 @@ class Updater(Module):
         N = changes.shape[2] 
         z_expand = torch.Tensor.expand(z.unsqueeze_(2),-1,-1,N)
         out = torch.cat((changes,z_expand),dim=1)
+        if self.norm:
+            out = F.normalize(out)
         out = self.network(out) #1024 x N
         out = convert_to_complex(out)
         out = torch.sum(out,dim=2)
