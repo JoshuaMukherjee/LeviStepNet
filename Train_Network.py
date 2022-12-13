@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import Dataset
 import time
 import pickle
@@ -6,7 +7,7 @@ from Symmetric_Functions import SymSum
 from Utlilities import *
 
 
-def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None):
+def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None,norm=False,norm_args={}):
     #TRAINING
     running = 0
     if not test:
@@ -22,7 +23,9 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             net.init(activation_init)
             
             for i in range(1,changes.shape[1]): #itterate over timestamps - Want timestamps-1 iterations because first one is zeros
-                change = changes[:,i,:,:] #Get batch
+                change = changes[:,i,:,:] #Get batch Bxtx3xN
+                if norm:
+                    change = F.normalize(change,**norm_args)
                 
                 activation_out = net(change)
                 pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
@@ -45,7 +48,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
 
 
 
-def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch ):
+def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch,norm_in=False,norm_args_in={} ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -56,9 +59,9 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
     try:   
         for epoch in range(epochs):
             #Train
-            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised)
+            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,norm=norm_in,norm_args=norm_args_in)
             #Test
-            running_test = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
+            running_test = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised,norm=norm_in,norm_args=norm_args_in)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)

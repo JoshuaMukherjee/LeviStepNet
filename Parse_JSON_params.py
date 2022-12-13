@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-    "test"
+    "Updater48"
 ]
 
 
@@ -53,7 +53,17 @@ def parse(params,name):
     
     batch = params["batch"]
 
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch)
+    if "norm" in params:
+        norm = params["norm"]
+    else:
+        norm = False
+    
+    if "norm-args" in params:
+        norm_args = params["norm-args"]
+    else:
+        norm_args = {}
+
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch,norm,norm_args)
 
 
 for file in files:
