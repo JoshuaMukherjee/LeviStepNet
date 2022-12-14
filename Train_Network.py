@@ -21,11 +21,11 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             if not test:
                 optimiser.zero_grad()            
             activation_init = activations[:,0,:]
-            # net.init(activation_init)
+            net.init(activation_init)
             
             
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
-                net.init(activation_init)
+                
                 loss = 0
                 optimiser.zero_grad()            
                 change = changes[:,i,:,:] #Get batch Bxtx3xN

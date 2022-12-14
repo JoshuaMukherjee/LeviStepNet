@@ -36,10 +36,11 @@ class Updater(Module):
         out = self.network(out) #1024 x N
         out = convert_to_complex(out)
         out = torch.sum(out,dim=2)
-        self.memory = self.memory + out
+        out += self.memory
         if "constrain_amp" in self.__dict__ and self.constrain_amp: #Backwards compatability - not very neat
-            self.memory = self.memory / torch.abs(self.memory)    
-        return self.memory
+            out = out / torch.abs(out)    
+        self.memory = out.detach()
+        return out
 
 
 if __name__ == "__main__":
