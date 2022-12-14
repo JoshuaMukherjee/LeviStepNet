@@ -14,6 +14,7 @@ from Utlilities import *
 from Updater import Updater
 from Networks import PointNet, MLP
 from Dataset import TimeDataset, TimeDatasetAtomic
+from Solvers import gspat, wgs
 
 args = sys.argv
 BOXPLOTS = False
@@ -37,42 +38,84 @@ try:
     ACTIVATIONS = "-a" in args
     TIME = "-t" in args
     SIGNED = not "-unsigned" in args
+    DETAILED = "-d" in args
 
 except IndexError:
     print("Invalid Arguments")
 
 if BOXPLOTS:
-    N = 10
+    if DETAILED:
+        N = 4  #Number of Plots
+    else:
+        N = 8
     dataset = TimeDatasetAtomic(N,2,N=4,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
 
-    pressures = []
-    true = []
+    fig1, f1_axes = plt.subplots(ncols=int(N/2), nrows=2, constrained_layout=True)
+    for dim in f1_axes:
+        for ax in dim:
 
-    for i in range(N):
-        p,c,a,pr = next(data)
-        activation_init = a[:,0,:]
-        net.init(activation_init)
-        change = c[:,1,:,:] #Get batch
-        activation_out = net(change) 
-        pressure_out = torch.abs(propagate(activation_out,p[:,1,:]))
-        pressures.append(pressure_out)
-        true.append(np.abs(pr[:,1,:].numpy())[0])
+            to_plot = {}
+            p,c,a,pr = next(data)
+            activation_init = a[:,0,:]
+            net.init(activation_init)
+            change = c[:,1,:,:] #Get batch
+            activation_out = net(change) 
+            pressure_out = torch.abs(propagate(activation_out,p[:,1,:])).detach().numpy()
+            to_plot["Network"] = list(pressure_out)
 
 
-    pressures = [p.detach().numpy() for p in pressures]
+            points = p[0,1,:]
+            A = forward_model(points)
+            backward = torch.conj(A).T
+            R = A@backward
+            _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 200)
+            gs_pat_200 = torch.abs(pres)
+            gs_pat_200 = [p.item() for p in gs_pat_200]
+            to_plot["GS-PAT-200"] = list(gs_pat_200)
+            if DETAILED:
+                _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 20)
+                gs_pat_20 = torch.abs(pres)
+                gs_pat_20 = [p.item() for p in gs_pat_20]
+                to_plot["GS-PAT-20"] = list(gs_pat_20)
 
-    for i,p in enumerate(pressures):
-        print(i,p,"sd",np.std(p),"mean",np.mean(p))
-    SPACING = 0.45
-    tplot = plt.boxplot(true,positions=np.linspace(0,len(true)-1,len(true)),widths=0.4)
-    pplot = plt.boxplot(pressures,positions=np.linspace(0,len(true)-1,len(true))-SPACING,widths=0.4)
-    plt.title("Pressures at points")
-    plt.xlabel("Point Set")
-    plt.ylabel("P")
-    plt.xticks(np.linspace(0,len(true)-1,len(true))-(SPACING/2))
+                _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 5)
+                gs_pat_5 = torch.abs(pres)
+                gs_pat_5 = [p.item() for p in gs_pat_5]
+                to_plot["GS-PAT-5"] = list(gs_pat_5)
+
+            _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,200)
+            wgs_200 = torch.abs(A@x[:,0])
+            to_plot["WGS-200"] = list(wgs_200)
+            if DETAILED:
+                _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,20)
+                wgs_20 = torch.abs(A@x[:,0])
+                to_plot["WGS-20"] = list(wgs_20)
+
+                _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,5)
+                wgs_5 = torch.abs(A@x[:,0])
+                to_plot["WGS-5"] = list(wgs_5)
+
+            print("-"*10)
+            for i in to_plot:
+                print(i,end=" ")
+                for val in to_plot[i]:
+                    print(float(val),end=" ")
+                print()
+                print("mean", np.mean(to_plot[i]),end=" ")
+                print("sd", np.std(to_plot[i]))
+            ax.boxplot(to_plot.values())
+            ax.set_xticklabels(to_plot.keys())
+            ax.set_ylim(bottom=0,top=13000)
+
+            
+
+        
     plt.show()
+
+
+
 
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))

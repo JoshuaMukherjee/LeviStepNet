@@ -33,7 +33,7 @@ class Updater(Module):
         N = changes.shape[2] 
         z_expand = torch.Tensor.expand(z.unsqueeze_(2),-1,-1,N)
         out = torch.cat((changes,z_expand),dim=1)
-        if self.norm:
+        if "norm" in self.__dict__ and self.norm:
             out = F.normalize(out)
         out = self.network(out) #1024 x N
         out = convert_to_complex(out)
