@@ -1,6 +1,5 @@
-from cmath import nan
 from torch.nn import Module
-import torch
+import torch, copy
 import torch.nn.functional as F
 
 from Utlilities import convert_to_complex, device
@@ -25,10 +24,9 @@ class Updater(Module):
         self.memory = start_activations
 
     def forward(self,changes):
-        # self.memory.detach() #needed?
         if self.memory is None:
             raise Exception("memory not initialised")
-
+        # self.memory.detach() #needed?
         z = self.encoder(torch.abs(self.memory))
         N = changes.shape[2] 
         z_expand = torch.Tensor.expand(z.unsqueeze_(2),-1,-1,N)
@@ -40,7 +38,7 @@ class Updater(Module):
         out = torch.sum(out,dim=2)
         self.memory = self.memory + out
         if "constrain_amp" in self.__dict__ and self.constrain_amp: #Backwards compatability - not very neat
-            self.memory = self.memory / torch.abs(self.memory)
+            self.memory = self.memory / torch.abs(self.memory)    
         return self.memory
 
 
