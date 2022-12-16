@@ -40,6 +40,7 @@ class Updater(Module):
         if "constrain_amp" in self.__dict__ and self.constrain_amp: #Backwards compatability - not very neat
             out = out / torch.abs(out)    
         self.memory = out.detach().clone() #copy then detach?
+        self.memory.requires_grad = True
         return out
 
 
