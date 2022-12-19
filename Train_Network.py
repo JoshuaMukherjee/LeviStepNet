@@ -3,13 +3,13 @@ import torch.nn.functional as F
 import Dataset
 import time
 import pickle
-import copy
+import random
 from Symmetric_Functions import SymSum
 from Utlilities import *
 
 
 
-def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None):
+def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None, random_stop=False):
     #TRAINING
     running = 0
     if not test:
@@ -17,13 +17,15 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
     else:
         net.eval()
     for dataset in datasets:
-        for points, changes, activations, pressures in iter(dataset):  
+        for points, changes, activations, pressures in iter(dataset):
+            ran = 0  
             if not test:
                 optimiser.zero_grad()            
             activation_init = activations[:,0,:]
             net.init(activation_init)
             
-            
+            if random_stop:
+                rand_len = random.randint(1,changes.shape[1])
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
                 
                 loss = 0
@@ -38,16 +40,20 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                     loss += loss_function(pressure_out,**loss_params)
                 
                 running += loss.item()
-                if not test:
-                    loss.backward()
-                    optimiser.step()
+                ran += 1
+                if random_stop and (i == rand_len):
+                    break
+
+            if not test:
+                loss.backward()
+                optimiser.step()
     if not test:
         if scheduler is not None:
             if type(scheduler) == torch.optim.lr_scheduler.ReduceLROnPlateau:
                 scheduler.step(running)
             else:
                 scheduler.step()
-    return running
+    return running/ran
 
 
 
@@ -62,7 +68,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
     try:   
         for epoch in range(epochs):
             #Train
-            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised)
+            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=True)
             #Test
             running_test = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
             
