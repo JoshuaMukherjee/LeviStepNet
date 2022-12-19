@@ -18,7 +18,6 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
         net.eval()
     for dataset in datasets:
         for points, changes, activations, pressures in iter(dataset):
-            ran = 0  
             if not test:
                 optimiser.zero_grad()            
             activation_init = activations[:,0,:]
@@ -26,24 +25,26 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             
             if random_stop:
                 rand_len = random.randint(1,changes.shape[1])
+            
+            optimiser.zero_grad()            
+        
+            end = 0
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
-                
-                loss = 0
-                optimiser.zero_grad()            
                 change = changes[:,i,:,:] #Get batch Bxtx3xN
-                
                 activation_out = net(change)
-                pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
-                if supervised:
-                    loss += loss_function(pressure_out,torch.abs(pressures[:,i,:]),**loss_params)
-                else:
-                    loss += loss_function(pressure_out,**loss_params)
-                
-                running += loss.item()
-                ran += 1
+
                 if random_stop and (i == rand_len):
                     break
-
+                end = i
+            
+            pressure_out = torch.abs(propagate(activation_out,points[:,end,:]))
+            
+            if supervised:
+                loss = loss_function(pressure_out,torch.abs(pressures[:,end,:]),**loss_params)
+            else:
+                loss = loss_function(pressure_out,**loss_params)
+                
+            running += loss.item()
             if not test:
                 loss.backward()
                 optimiser.step()
@@ -53,7 +54,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                 scheduler.step(running)
             else:
                 scheduler.step()
-    return running/ran
+    return running
 
 
 

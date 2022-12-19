@@ -14,21 +14,16 @@
     },
     "updater":"Updater",
     "updater-args":{
-        "constrain_amp":true
+        "constrain_amp":true,
+        "norm":true
     },
     "start-epochs":0,
     "epochs":100,
-    "train":["Train-2-180000-4A.pth"],
-    "test":["Test-2-5000-4A.pth"],
+    "train":["Train-10-18000-4A.pth"],
+    "test":["Test-10-1000-4A.pth"],
     "optimiser":"NAdam",
-    "optimiser-args":{"lr":1e-4},
+    "optimiser-args":{"lr":1e-6},
     "loss-function":"max_loss",
     "supervised":true,
-    "batch":16,
-    "scheduler":"CyclicLR",
-    "scheduler-args":{"base_lr":1e-6,
-                        "max_lr":1e-3,
-                        "step_size_up":5,
-                        "cycle_momentum":false
-                    }
+    "batch":16
 }
