@@ -22,7 +22,7 @@
     "train":["Train-10-18000-4A.pth"],
     "test":["Test-10-1000-4A.pth"],
     "optimiser":"NAdam",
-    "optimiser-args":{"lr":1e-3},
+    "optimiser-args":{"lr":1e-5},
     "loss-function":"max_loss",
     "supervised":true,
     "batch":16,
