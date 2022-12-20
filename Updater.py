@@ -41,7 +41,7 @@ class Updater(Module):
             self.memory = self.memory / torch.abs(self.memory)    
         # self.memory = out.detach().clone() #copy then detach?
         # self.memory.requires_grad = True
-        return out
+        return self.memory
 
 
 if __name__ == "__main__":
