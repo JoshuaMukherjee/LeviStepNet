@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-    "Updater50"
+    "Updater55"
 ]
 
 
@@ -51,9 +51,14 @@ def parse(params,name):
     else:
         scheduler = None
     
+    if "random-stop" in params:
+        rand_stop = params["random-stop"]
+    else:
+        rand_stop = False
+    
     batch = params["batch"]
 
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch)
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch, rand_stop)
 
 
 for file in files:

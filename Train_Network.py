@@ -58,7 +58,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
 
 
 
-def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch ):
+def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch, random_stop ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -69,7 +69,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
     try:   
         for epoch in range(epochs):
             #Train
-            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=True)
+            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop)
             #Test
             running_test = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
             
