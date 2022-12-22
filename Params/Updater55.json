@@ -19,7 +19,7 @@
     },
     "start-epochs":0,
     "epochs":100,
-    "train":["Train-10-18000-4A.pth"],
+    "train":["Train-10-70000-4A.pth"],
     "test":["Test-10-1000-4A.pth"],
     "optimiser":"NAdam",
     "optimiser-args":{"lr":1e-6},
