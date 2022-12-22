@@ -27,7 +27,7 @@ class Updater(Module):
         if self.memory is None:
             raise Exception("memory not initialised")
         # self.memory.detach() #needed?
-        z = self.encoder(torch.abs(self.memory))
+        z = self.encoder(torch.angle(self.memory))
         N = changes.shape[2] 
         z_expand = torch.Tensor.expand(z.unsqueeze_(2),-1,-1,N)
         out = torch.cat((changes,z_expand),dim=1)
