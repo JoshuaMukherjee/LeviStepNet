@@ -29,6 +29,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             optimiser.zero_grad()            
         
             end = 0
+            outputs = []
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
                 change = changes[:,i,:,:] #Get batch Bxtx3xN
                 activation_out = net(change)
@@ -37,12 +38,21 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                     break
                 end = i
             
-            pressure_out = torch.abs(propagate(activation_out,points[:,end,:]))
-            
+                pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
+                outputs.append(pressure_out)
+
+            output = torch.stack(outputs,dim=1) #compare to torch.abs(pressures[:,1:,:])
+            target = torch.abs(pressures[:,1:,:])
+           
+            # if supervised:
+            #     loss = loss_function(pressure_out,torch.abs(pressures[:,end,:]),**loss_params)
+            # else:
+            #     loss = loss_function(pressure_out,**loss_params)
+
             if supervised:
-                loss = loss_function(pressure_out,torch.abs(pressures[:,end,:]),**loss_params)
+                loss = loss_function(output,target,**loss_params)
             else:
-                loss = loss_function(pressure_out,**loss_params)
+                loss = loss_function(output,**loss_params)
                 
             running += loss.item()
             if not test:
