@@ -201,7 +201,7 @@ if ACTIVATIONS:
 
 if TIME:
     N = 1
-    T = 100
+    T = 25
     dataset = TimeDatasetAtomic(N,T,N=4,signed=SIGNED)
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
