@@ -1,0 +1,28 @@
+{
+    "net":"PointNet",
+    "net-args":{
+        "layer_sets":[[1000,1000],[1000,2000,2000],[2000,2000,1024]],
+        "batch_norm":"BatchNorm1d",
+        "input_size":67,
+        "activation":"Tanh"
+    },
+    "encoder":"MLP",
+    "encoder-args":{
+        "layers":[1024,256,256,256,64],
+        "batch_norm":"BatchNorm1d",
+        "activation":"Tanh"
+    },
+    "updater":"Updater",
+    "updater-args":{
+        "constrain_amp":true
+    },
+    "start-epochs":0,
+    "epochs":100,
+    "train":["Train-10-70000-4A.pth"],
+    "test":["Test-10-1000-4A.pth"],
+    "optimiser":"NAdam",
+    "optimiser-args":{"lr":1e-3},
+    "loss-function":"mse_loss",
+    "supervised":true,
+    "batch":16
+}
