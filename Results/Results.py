@@ -39,6 +39,7 @@ try:
     TIME = "-t" in args
     SIGNED = not "-unsigned" in args
     DETAILED = "-d" in args
+    NORM = "-n" in args
 
 except IndexError:
     print("Invalid Arguments")
@@ -120,6 +121,9 @@ if BOXPLOTS:
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))
     train,test = loss
+    if NORM:
+        train = train/np.linalg.norm(train)
+        test = test/np.linalg.norm(test)
     # train = np.abs(train)
     # test = np.abs(test)
     plt.plot(train,label="train")
