@@ -10,7 +10,9 @@ from Utlilities import *
 
 
 
-def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None, random_stop=False, clip=False, clip_args={}):
+def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, 
+                supervised=True, scheduler = None, random_stop=False, clip=False,
+                clip_args={}, amp_reg_function = None, amp_reg_lambda = 0):
     #TRAINING
     running = 0
     if not test:
@@ -33,6 +35,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
         
             end = 0
             outputs = []
+            amp_reg_val = 0
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
                 change = changes[:,i,:,:] #Get batch Bxtx3xN
                 activation_out = net(change)
@@ -40,9 +43,15 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                 if random_stop and (i == rand_len):
                     break
                 end = i
-            
-                pressure_out = torch.abs(propagate(activation_out,points[:,i,:]))
+
+                field = propagate(activation_out,points[:,i,:])
+                pressure_out = torch.abs(field)
                 outputs.append(pressure_out)
+
+                if amp_reg_function is not None:
+                    phases_out = torch.angle(activation_out)
+                    phases_target = torch.angle(activations[:,i,:])
+                    amp_reg_val += amp_reg_lambda * amp_reg_function(phases_out,phases_target )
 
             output = torch.stack(outputs,dim=1) #compare to torch.abs(pressures[:,1:,:])
             target = torch.abs(pressures[:,1:,:])
@@ -53,9 +62,12 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
             #     loss = loss_function(pressure_out,**loss_params)
 
             if supervised:
-                loss = loss_function(output,target,**loss_params)
+                loss = loss_function(output,target,**loss_params) + amp_reg_val
             else:
-                loss = loss_function(output,**loss_params)
+                loss = loss_function(output,**loss_params) + amp_reg_val
+            
+            
+          
                 
             running += loss.item()
             grad = None
@@ -77,7 +89,10 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
 
 
 
-def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch, random_stop, clip=False, clip_args={}, log_grad =False ):
+def train(net, start_epochs, epochs, train, test, optimiser, 
+            loss_function, loss_params, supervised, scheduler, name, 
+            batch, random_stop, clip=False, clip_args={}, log_grad =False,
+            amp_reg_function=None, amp_reg_lambda=None ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -87,9 +102,9 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
     try:   
         for epoch in range(epochs):
             #Train
-            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args )
+            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args, amp_reg_function=amp_reg_function, amp_reg_lambda=amp_reg_lambda )
             #Test
-            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
+            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised, amp_reg_function=amp_reg_function, amp_reg_lambda=amp_reg_lambda)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)

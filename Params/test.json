@@ -33,5 +33,8 @@
                     },
     "clip":true,
     "clip-args":{"max_norm":1e3},
-    "log-grad":true
+    "log-grad":true,
+    "amp-reg-fun":"mse_loss",
+    "amp-reg-lambda":1e6
+
 }

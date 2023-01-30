@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-   "Updater102"
+   "test"
 ]
 
 
@@ -69,9 +69,19 @@ def parse(params,name):
         log_grad = params["log-grad"]
     else:
         log_grad = False
+    
+    if "amp-reg-fun" in params:
+        amp_reg_function = getattr(Loss_Functions, params["amp-reg-fun"])
+        amp_reg_lambda = params["amp-reg-lambda"]
+    else:
+        amp_reg_function = None
+        amp_reg_lambda = 0
 
     
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch, rand_stop, clip, clip_params, log_grad)
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,
+        loss_function,loss_params, supervised, scheduler, 
+        name, batch, rand_stop, clip, clip_params, log_grad,
+        amp_reg_function, amp_reg_lambda)
 
 
 for file in files:
