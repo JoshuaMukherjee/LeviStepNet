@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 import Dataset
 import time
 import pickle
@@ -9,13 +10,15 @@ from Utlilities import *
 
 
 
-def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None, random_stop=False):
+def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, supervised=True, scheduler = None, random_stop=False, clip=False, clip_args={}):
     #TRAINING
     running = 0
     if not test:
         net.train()
     else:
         net.eval()
+
+    
     for dataset in datasets:
         for points, changes, activations, pressures in iter(dataset):
             if not test:
@@ -55,8 +58,14 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                 loss = loss_function(output,**loss_params)
                 
             running += loss.item()
+            grad = None
             if not test:
                 loss.backward()
+                if clip:
+                    grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
+                    grad = sum(grads)/len(grads)
+                    nn.utils.clip_grad_norm_(net.parameters(), **clip_args)
+                    # print({n:p.grad for n, p in net.named_parameters()}["encoder.layers.5.weight"])
                 optimiser.step()
     if not test:
         if scheduler is not None:
@@ -64,29 +73,31 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, su
                 scheduler.step(running)
             else:
                 scheduler.step()
-    return running
+    return running, grad
 
 
 
-def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch, random_stop ):
+def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss_params, supervised, scheduler, name, batch, random_stop, clip=False, clip_args={}, log_grad =False ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
     losses_test = []
     best_test = torch.inf
 
-
     try:   
         for epoch in range(epochs):
             #Train
-            running = do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop)
+            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args )
             #Test
-            running_test = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
+            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
 
             print(name,epoch+start_epochs,"Training",running,"Testing",running_test,"Time",time.asctime(),"Start",start_time, end=" ")
+            if log_grad:
+                print("grad",grad, end = " ")
+            
             # if supervised: #what is this for?
             #     running_test = torch.abs(running_test)
             if running_test < best_test: #Only save if the best 
@@ -102,6 +113,7 @@ def train(net, start_epochs, epochs, train, test, optimiser, loss_function, loss
 
     except KeyboardInterrupt:
         pass
+
 
 
 if __name__ == "__main__":

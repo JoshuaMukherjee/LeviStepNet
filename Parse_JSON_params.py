@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-   "Updater101"
+   "Updater102"
 ]
 
 
@@ -56,7 +56,22 @@ def parse(params,name):
     else:
         rand_stop = False
     
-    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch, rand_stop)
+    if "clip" in params:
+        clip = params["clip"]
+        if "clip-args" in params:
+            clip_params = params["clip-args"]
+        else:
+            clip_params = {}
+    else:
+        clip = False
+    
+    if "log-grad" in params:
+        log_grad = params["log-grad"]
+    else:
+        log_grad = False
+
+    
+    train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,loss_function,loss_params, supervised, scheduler, name, batch, rand_stop, clip, clip_params, log_grad)
 
 
 for file in files:
