@@ -3,7 +3,7 @@
     "net-args":{
         "layer_sets":[[32],[32],[32,32,1024]],
         "batch_norm":"BatchNorm1d",
-        "input_size":13,
+        "input_size":35,
         "activation":"SELU"
     },
     "encoder":"MLP",
