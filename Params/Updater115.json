@@ -33,6 +33,6 @@
     "clip":true,
     "clip-args":{"max_norm":1e9},
     "log-grad":false,
-    "phase-reg-fun":"mse",
+    "phase-reg-fun":"mse_loss",
     "phase-reg-lambda":0.1
 }
