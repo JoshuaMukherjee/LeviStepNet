@@ -12,7 +12,7 @@ from Utlilities import *
 
 def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, 
                 supervised=True, scheduler = None, random_stop=False, clip=False,
-                clip_args={}, amp_reg_function = None, amp_reg_lambda = 0):
+                clip_args={}, phase_reg_function = None, phase_reg_lambda = 0):
     #TRAINING
     running = 0
     if not test:
@@ -48,10 +48,10 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
                 pressure_out = torch.abs(field)
                 outputs.append(pressure_out)
 
-                if amp_reg_function is not None:
+                if phase_reg_function is not None:
                     phases_out = torch.angle(activation_out)
                     phases_target = torch.angle(activations[:,i,:])
-                    amp_reg_val += amp_reg_lambda * amp_reg_function(phases_out,phases_target )
+                    amp_reg_val += phase_reg_lambda * phase_reg_function(phases_out,phases_target )
 
             output = torch.stack(outputs,dim=1) #compare to torch.abs(pressures[:,1:,:])
             target = torch.abs(pressures[:,1:,:])
@@ -92,7 +92,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
 def train(net, start_epochs, epochs, train, test, optimiser, 
             loss_function, loss_params, supervised, scheduler, name, 
             batch, random_stop, clip=False, clip_args={}, log_grad =False,
-            amp_reg_function=None, amp_reg_lambda=None ):
+            phase_reg_function=None, phase_reg_lambda=None ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -102,9 +102,9 @@ def train(net, start_epochs, epochs, train, test, optimiser,
     try:   
         for epoch in range(epochs):
             #Train
-            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args, amp_reg_function=amp_reg_function, amp_reg_lambda=amp_reg_lambda )
+            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args, amp_reg_function=phase_reg_function, amp_reg_lambda=phase_reg_lambda )
             #Test
-            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised, amp_reg_function=amp_reg_function, amp_reg_lambda=amp_reg_lambda)
+            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised, amp_reg_function=phase_reg_function, amp_reg_lambda=phase_reg_lambda)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
