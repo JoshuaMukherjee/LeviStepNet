@@ -169,48 +169,139 @@ class MLP(Module):
             out = layer(out)
         return out
 
+
+class ResBlock(Module):
+    def __init__(self, D, D1, D2, 
+                kernel=1, kernel_pad="same",padding_mode="zeros",
+                activation = None, norm = None):
+        super(ResBlock, self).__init__()
+
+        if type(norm) == str:
+            norm = getattr(torch.nn,norm)
+        
+        if type(activation) == str:
+            activation = getattr(torch.nn,activation) 
+
+        self.block1 = torch.nn.Conv1d(D , D1, kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
+        
+        if activation is not None:
+            self.act = activation().to(device)
+        else:
+            self.act = None
+        
+        self.block1_norm = norm(D1)
+
+        self.block2 = torch.nn.Conv1d(D1, D2, kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
+    
+
+        self.block3 = torch.nn.Conv1d(D , D2, kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
+        self.block3_norm =  norm(D2)
+        
+    
+    def forward(self,x):
+        x1 = self.block1(x)
+        if self.act is not None:
+            x1 = self.act(x1)
+        x1 = self.block1_norm(x1)
+
+        x1 = self.block2(x1)
+        x = self.block3(x)
+        x = self.block3_norm(x)
+
+        x = x+x1
+        if self.act is not None:
+            x = self.act(x)
+
+        return x
+
+class ResPointNet(Module):
+    def __init__(self, layer_sets, input_size=3,
+                kernel=1, kernel_pad="same",padding_mode="zeros",
+                activation = None, norm = None,
+                sym_function=SymMax, sym_args={}):
+        super(ResPointNet,self).__init__()
+
+        self.sym_function = sym_function(**sym_args)
+
+
+        self.blocks = torch.nn.ModuleList()
+        D = input_size
+        assert(len(layer_sets) == 3)
+
+        local_features = layer_sets[0][-1]
+
+        for layer_i,layer in enumerate(layer_sets):
+            self.blocks.append(torch.nn.ModuleList())
+            for i in range(0,len(layer),2):
+                D1 = layer[i]
+                D2 = layer[i+1]
+                if layer_i == 2 and i ==0:
+                    D += local_features
+                block = ResBlock(D,D1,D2,  kernel=kernel, kernel_pad=kernel_pad,padding_mode=padding_mode,  activation = activation, norm = norm)
+                self.blocks[layer_i].append(block)
+                D = D2
+                
+    def forward(self,x):
+        out = x
+        for layer in self.blocks[0]:
+            out = layer(out)
+        local_features = out
+        for layer in self.blocks[1]:
+            out = layer(out)
+        
+        out = self.sym_function(out)
+        N = x.shape[2]
+        global_features = torch.Tensor.expand(out.unsqueeze_(2),-1,-1,N)
+        out = torch.cat((local_features,global_features),dim=1)
+        for layer in self.blocks[2]:
+            out = layer(out)
+        
+
+        return out
+
+
 if __name__ == "__main__":
 
-    layers = [100,200,400,300]
     act = "ELU"
     bn = torch.nn.BatchNorm1d
-    net = MLP(layers,activation=act,batch_norm=bn)
-    print(net)
-    point = torch.ones((2,512))
-    print(point)
-    net(point)
+    # net = ResPointNet([[10,20,30,40],[50,60],[70,80]],activation=act,norm=bn)
+    m = 512
+    layers = [[64,64],[64,128],[512,256,128,m]]
+    norm = torch.nn.BatchNorm1d
+    net = ResPointNet(layers,norm=norm)
+    # print(net)
 
 
 
-    # from Dataset import *
-    # from torch.utils.data import DataLoader 
-    # from Symmetric_Functions import SymSum
+    from Dataset import *
+    from torch.utils.data import DataLoader 
+    from Symmetric_Functions import SymSum
 
     # m = 512
     # layers = [[64,64],[64,128,1024],[512,256,128,128,m]]
     # norm = torch.nn.BatchNorm1d
     # net = PointNet(layers,batch_norm=norm)
-    # print(net)
+    print(net)
 
-    # data = TimeDataset(5,4)
-    # points = DataLoader(data,2,shuffle=True)
-    # points,changes,_,_ = next(iter(points))
-    # perm = permute_points(changes,[0,2,1,3],axis=3)
+    data = TimeDatasetAtomic(5,4)
+    points = DataLoader(data,2,shuffle=True)
+    points,changes,_,_ = next(iter(points))
+    perm = permute_points(changes,[0,2,1,3],axis=3)
 
-    # for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
-    #     #itterate over timestamps
-    #     change = changes[:,i,:,:] #Get batch
-    #     out = net(change)
-    #     p=points[:,i,:,:]
-    #     # print(swap_output_to_activations(out,p))
-    #     print(out)
-    #     print(out.shape)
+    for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
+        #itterate over timestamps
+        change = changes[:,i,:,:] #Get batch
+        out = net(change)
+        p=points[:,i,:,:]
+        # print(swap_output_to_activations(out,p))
+        print(out)
+        print(out.shape)
 
-    #     permed = perm[:,i,:,:]
-    #     perm_out = torch.sum(net(permed))
-    #     print(torch.all(perm_out == torch.sum(out))) #Should be True
-    #     # print(torch.all(permed==change)) 
+        permed = perm[:,i,:,:]
+        perm_out = torch.sum(net(permed))
+        print(torch.all(perm_out == torch.sum(out))) #Should be True
+        # print(torch.all(permed==change)) 
 
-        # rand = torch.rand_like(change)
-        # rand_out = net(rand)
-        # print(torch.all(rand_out == out))
+        rand = torch.rand_like(change)
+        rand_out = net(rand)
+        print(torch.all(rand_out == out)) #Should be False
