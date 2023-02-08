@@ -64,6 +64,7 @@ def parse(params,name):
             clip_params = {}
     else:
         clip = False
+        clip_params = {}
     
     if "log-grad" in params:
         log_grad = params["log-grad"]
