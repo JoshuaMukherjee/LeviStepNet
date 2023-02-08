@@ -1,7 +1,7 @@
 {
     "net":"ResPointNet",
     "net-args":{
-        "layer_sets":[[64,64],[64,64],[64,64,64,1024]],
+        "layer_sets":[[32,32,32,32],[32,32,32,32],[32,32,32,32,32,1024]],
         "norm":"BatchNorm1d",
         "input_size":35,
         "activation":"ReLU"
