@@ -8,6 +8,12 @@ import Activations
 
 
 class PointNet(Module):
+    '''
+    Charles R. Qi, Hao Su, Kaichun Mo, and Leonidas J. Guibas. 2016. PointNet: Deep
+    Learning on Point Sets for 3D Classification and Segmentation. (12 2016). 
+    http://arxiv.org/abs/1612.00593
+    '''
+
     def __init__(self, layer_sets,input_size=3, 
                     activation=torch.nn.ReLU, 
                     kernel=1, kernel_pad="same",padding_mode="zeros",
@@ -171,6 +177,13 @@ class MLP(Module):
 
 
 class ResBlock(Module):
+    '''
+    Adapted From
+    Li, B., Zhang, Y. & Sun, F. 
+    Deep residual neural network based PointNet for 3D object part segmentation. 
+    Multimed Tools Appl 81, 11933–11947 (2022). 
+    https://doi.org/10.1007/s11042-020-09609-8
+    '''
     def __init__(self, D, D1, D2, 
                 kernel=1, kernel_pad="same",padding_mode="zeros",
                 activation = None, norm = None):
@@ -215,6 +228,13 @@ class ResBlock(Module):
         return x
 
 class ResPointNet(Module):
+    '''
+    Adapted From
+    Li, B., Zhang, Y. & Sun, F. 
+    Deep residual neural network based PointNet for 3D object part segmentation. 
+    Multimed Tools Appl 81, 11933–11947 (2022). 
+    https://doi.org/10.1007/s11042-020-09609-8
+    '''
     def __init__(self, layer_sets, input_size=3,
                 kernel=1, kernel_pad="same",padding_mode="zeros",
                 activation = None, norm = None,
