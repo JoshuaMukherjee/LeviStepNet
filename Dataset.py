@@ -72,7 +72,7 @@ class TimeDatasetAtomic(Dataset):
         self.seed = seed #custom seed
         self.sort_fun = sort_fun #allows sorting the points within a set
         self.threshold = threshold #The ammount a point can change by +/- -> Unused, backcompatability with old code
-        self.movement = movement #The amount to move a point per timestep
+        self.movement = movement #The amount to move a point per timestep - 0.01 = 1cm
     
         self.points = []
         self.changes = []
@@ -131,15 +131,16 @@ class TimeDatasetAtomic(Dataset):
 
 
 if __name__ == "__main__":
-    timestamps = 2
-    length = 180000
+    timestamps = 10
+    length = 70000
     test_length = 1000
     N = 4
-    train = TimeDatasetAtomic(length,timestamps,N=N)
+    movement = 0.001
+    train = TimeDatasetAtomic(length,timestamps,N=N,movement=movement)
     torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+"A.pth")
 
     if test_length > 0:
-        test = TimeDataset(test_length,timestamps,N=N)
+        test = TimeDataset(test_length,timestamps,N=N,movement=movement)
         torch.save(test,"Datasets/Test-"+str(timestamps)+"-"+str(test_length)+"-"+str(N)+"A.pth")
     
    
