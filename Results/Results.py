@@ -25,6 +25,7 @@ ACTIVATIONS = False
 TIME = False
 SIGNED = True
 OLD_MOVE = False
+PHASES = False
 P_32 = False
 P_16 = False
 
@@ -50,6 +51,7 @@ try:
     P_32 = "-32" in args
     P_16 = "-16" in args
     P_8 = "-8" in args
+    PHASES = "-ph" in args
 
 
     if OLD_MOVE:
@@ -252,6 +254,52 @@ if TIME:
     plt.plot(stds,label="Standard Deviation")
     plt.legend()
     plt.show()
+
+if PHASES:
+    N = 2
+    T = 5
+    dataset = TimeDatasetAtomic(N,T,N=point_count,signed=SIGNED,movement=movement)
+    data = iter(DataLoader(dataset,1,shuffle=True))
+
+    to_disp = []
+    p,c,a,pr = next(data)
+    activation_init = a[:,0,:]
+    net.init(activation_init)
+    last = activation_init
+    
+    min_dif = 0
+    max_dif = 2*torch.pi
+    for i in range(T):
+        change = c[:,i,:,:] #Get change batch
+        activation_out = net(change)
+        diff = torch.abs(torch.angle(activation_out) - torch.angle(last))
+       
+
+        diff = torch.reshape(diff,(2,16,16))
+        to_disp.append(diff)
+        last = activation_out
+    print(min_dif,max_dif)
+    gs = matplotlib.gridspec.GridSpec(2,T+1)
+
+    for i,act in enumerate(to_disp):
+        ax_up = plt.subplot(gs[0, i])
+        ax_down = plt.subplot(gs[1, i])
+        mshw = ax_up.matshow(act[0].detach().numpy(),vmin=min_dif, vmax=max_dif)
+        ax_down.matshow(act[1].detach().numpy())
+        ax_up.set_axis_off()
+        ax_down.set_axis_off()
+       
+    
+    colour_ax = plt.subplot(gs[0:2,T])
+    plt.colorbar(mshw, cax=colour_ax,ticks=[0,torch.pi, 2*torch.pi])
+    colour_ax.set_yticklabels(["0","π","2π"])
+
+
+    plt.show()
+    
+
+      
+    
 
     
 
