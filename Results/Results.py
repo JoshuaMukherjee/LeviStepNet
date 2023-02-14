@@ -24,6 +24,10 @@ MAX_LOSS = False
 ACTIVATIONS = False
 TIME = False
 SIGNED = True
+OLD_MOVE = False
+
+
+
 
 try:
     path = args[1]
@@ -40,6 +44,13 @@ try:
     SIGNED = not "-unsigned" in args
     DETAILED = "-d" in args
     NORM = "-n" in args
+    OLD_MOVE = "-oldmove" in args
+
+
+    if OLD_MOVE:
+        movement = 0.0001
+    else:
+        movement= 0.005
 
 except IndexError:
     print("Invalid Arguments")
@@ -49,7 +60,7 @@ if BOXPLOTS:
         N = 4  #Number of Plots
     else:
         N = 8
-    dataset = TimeDatasetAtomic(N,2,N=4,signed=SIGNED)
+    dataset = TimeDatasetAtomic(N,2,N=4,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
 
@@ -145,7 +156,7 @@ if LOSS:
 if MAX_LOSS:
     from Loss_Functions import max_loss
     N = 50
-    dataset = TimeDatasetAtomic(N,2,signed=SIGNED)
+    dataset = TimeDatasetAtomic(N,2,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -174,7 +185,7 @@ if MAX_LOSS:
     
 if ACTIVATIONS:
     N = 5
-    dataset = TimeDatasetAtomic(N,2,signed=SIGNED)
+    dataset = TimeDatasetAtomic(N,2,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -206,7 +217,7 @@ if ACTIVATIONS:
 if TIME:
     N = 1
     T = 25
-    dataset = TimeDatasetAtomic(N,T,N=4,signed=SIGNED)
+    dataset = TimeDatasetAtomic(N,T,N=4,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
     stds = []

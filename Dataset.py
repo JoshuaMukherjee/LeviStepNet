@@ -131,16 +131,20 @@ class TimeDatasetAtomic(Dataset):
 
 
 if __name__ == "__main__":
+    
     timestamps = 10
-    length = 70000
+    length = 0
     test_length = 1000
     N = 4
     movement = 0.001
-    train = TimeDatasetAtomic(length,timestamps,N=N,movement=movement)
-    torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+"A.pth")
+    
+    if length > 0:
+            
+        train = TimeDatasetAtomic(length,timestamps,N=N,movement=movement)
+        torch.save(train,"Datasets/Train-"+str(timestamps)+"-"+str(length)+"-"+str(N)+"A.pth")
 
     if test_length > 0:
-        test = TimeDataset(test_length,timestamps,N=N,movement=movement)
+        test = TimeDatasetAtomic(test_length,timestamps,N=N,movement=movement)
         torch.save(test,"Datasets/Test-"+str(timestamps)+"-"+str(test_length)+"-"+str(N)+"A.pth")
     
    
