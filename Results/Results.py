@@ -25,6 +25,8 @@ ACTIVATIONS = False
 TIME = False
 SIGNED = True
 OLD_MOVE = False
+P_32 = False
+P_16 = False
 
 
 
@@ -45,12 +47,25 @@ try:
     DETAILED = "-d" in args
     NORM = "-n" in args
     OLD_MOVE = "-oldmove" in args
+    P_32 = "-32" in args
+    P_16 = "-16" in args
+    P_8 = "-8" in args
 
 
     if OLD_MOVE:
-        movement = 0.0001
+        movement = 0.005
     else:
-        movement= 0.005
+        movement= 0.001
+    print(movement)
+    
+    point_count=4
+    if P_32:
+        point_count = 32
+    if P_16:
+        point_count = 16
+    if P_8:
+        point_count = 8
+    print(point_count)
 
 except IndexError:
     print("Invalid Arguments")
@@ -60,7 +75,7 @@ if BOXPLOTS:
         N = 4  #Number of Plots
     else:
         N = 8
-    dataset = TimeDatasetAtomic(N,2,N=4,signed=SIGNED,movement=movement)
+    dataset = TimeDatasetAtomic(N,2,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
 
@@ -82,30 +97,30 @@ if BOXPLOTS:
             A = forward_model(points)
             backward = torch.conj(A).T
             R = A@backward
-            _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 200)
+            _,pres = gspat(R,A,backward,torch.ones(point_count,1).to(device)+0j, 200)
             gs_pat_200 = torch.abs(pres)
             gs_pat_200 = [p.item() for p in gs_pat_200]
             to_plot["GS-PAT-200"] = list(gs_pat_200)
             if DETAILED:
-                _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 20)
+                _,pres = gspat(R,A,backward,torch.ones(point_count,1).to(device)+0j, 20)
                 gs_pat_20 = torch.abs(pres)
                 gs_pat_20 = [p.item() for p in gs_pat_20]
                 to_plot["GS-PAT-20"] = list(gs_pat_20)
 
-                _,pres = gspat(R,A,backward,torch.ones(4,1).to(device)+0j, 5)
+                _,pres = gspat(R,A,backward,torch.ones(point_count,1).to(device)+0j, 5)
                 gs_pat_5 = torch.abs(pres)
                 gs_pat_5 = [p.item() for p in gs_pat_5]
                 to_plot["GS-PAT-5"] = list(gs_pat_5)
 
-            _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,200)
+            _, _, x = wgs(A,torch.ones(point_count,1).to(device)+0j,200)
             wgs_200 = torch.abs(A@x[:,0])
             to_plot["WGS-200"] = list(wgs_200)
             if DETAILED:
-                _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,20)
+                _, _, x = wgs(A,torch.ones(point_count,1).to(device)+0j,20)
                 wgs_20 = torch.abs(A@x[:,0])
                 to_plot["WGS-20"] = list(wgs_20)
 
-                _, _, x = wgs(A,torch.ones(4,1).to(device)+0j,5)
+                _, _, x = wgs(A,torch.ones(point_count,1).to(device)+0j,5)
                 wgs_5 = torch.abs(A@x[:,0])
                 to_plot["WGS-5"] = list(wgs_5)
 
@@ -156,7 +171,7 @@ if LOSS:
 if MAX_LOSS:
     from Loss_Functions import max_loss
     N = 50
-    dataset = TimeDatasetAtomic(N,2,signed=SIGNED,movement=movement)
+    dataset = TimeDatasetAtomic(N,2,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -185,7 +200,7 @@ if MAX_LOSS:
     
 if ACTIVATIONS:
     N = 5
-    dataset = TimeDatasetAtomic(N,2,signed=SIGNED,movement=movement)
+    dataset = TimeDatasetAtomic(N,2,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     
 
@@ -216,8 +231,8 @@ if ACTIVATIONS:
 
 if TIME:
     N = 1
-    T = 25
-    dataset = TimeDatasetAtomic(N,T,N=4,signed=SIGNED,movement=movement)
+    T = 20
+    dataset = TimeDatasetAtomic(N,T,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
     stds = []

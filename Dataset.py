@@ -133,7 +133,7 @@ class TimeDatasetAtomic(Dataset):
 if __name__ == "__main__":
     
     timestamps = 10
-    length = 0
+    length = 50000
     test_length = 1000
     N = 4
     movement = 0.001
