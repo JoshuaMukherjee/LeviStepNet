@@ -245,7 +245,7 @@ class ResPointNet(Module):
     '''
     def __init__(self, layer_sets, input_size=3,
                 kernel=1, kernel_pad="same",padding_mode="zeros",
-                activation = None, norm = None,
+                activation = None, batch_norm = None,
                 sym_function=SymMax, sym_args={}):
         super(ResPointNet,self).__init__()
 

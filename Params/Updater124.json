@@ -2,7 +2,7 @@
     "net":"ResPointNet",
     "net-args":{
         "layer_sets":[[24,24,24,24],[24,24,24,24],[24,24,24,1024]],
-        "norm":"BatchNorm1d",
+        "batch_norm":"BatchNorm1d",
         "input_size":35,
         "activation":"SELU"
     },
