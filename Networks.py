@@ -265,7 +265,7 @@ class ResPointNet(Module):
                 D2 = layer[i+1]
                 if layer_i == 2 and i ==0:
                     D += local_features
-                block = ResBlock(D,D1,D2,  kernel=kernel, kernel_pad=kernel_pad,padding_mode=padding_mode,  activation = activation, norm = norm)
+                block = ResBlock(D,D1,D2,  kernel=kernel, kernel_pad=kernel_pad,padding_mode=padding_mode,  activation = activation, norm = batch_norm)
                 self.blocks[layer_i].append(block)
                 D = D2
                 

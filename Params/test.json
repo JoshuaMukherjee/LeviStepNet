@@ -2,7 +2,7 @@
     "net":"ResPointNet",
     "net-args":{
         "layer_sets":[[32,32,32,32],[32,32,32,32],[32,32,32,1024]],
-        "norm":"BatchNorm1d",
+        "batch_norm":"BatchNorm1d",
         "input_size":35,
         "activation":"ReLU"
     },
@@ -30,6 +30,7 @@
                         "max_lr":1e-3,
                         "step_size_up":5,
                         "cycle_momentum":false
-                    }
+                    },
+    "norm-loss":true
                 
 }

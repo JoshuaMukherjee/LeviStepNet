@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-   "Updater133"
+   "test"
 ]
 
 
@@ -77,12 +77,18 @@ def parse(params,name):
     else:
         phase_reg_function = None
         phase_reg_lambda = 0
+    
+    if "norm-loss" in params:
+        norm_loss = True
+    else:
+        norm_loss = False
 
     
     train(updater,start_epochs,epochs,train_sets,test_sets,optimiser,
         loss_function,loss_params, supervised, scheduler, 
         name, batch, rand_stop, clip, clip_params, log_grad,
-        phase_reg_function, phase_reg_lambda)
+        phase_reg_function, phase_reg_lambda,
+        norm_loss)
 
 
 for file in files:

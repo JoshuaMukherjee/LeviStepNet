@@ -8,6 +8,7 @@ In Advances in Neural Information Processing Systems 32 (pp. 8024–8035).
 Curran Associates, Inc. 
 Retrieved from http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf
 '''
+
 import Dataset
 import time
 import pickle
@@ -19,7 +20,7 @@ from Utlilities import *
 
 def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, 
                 supervised=True, scheduler = None, random_stop=False, clip=False,
-                clip_args={}, phase_reg_function = None, phase_reg_lambda = 0):
+                clip_args={}, phase_reg_function = None, phase_reg_lambda = 0, norm_loss = False):
     #TRAINING
     running = 0
     if not test:
@@ -73,8 +74,11 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
             else:
                 loss = loss_function(output,**loss_params) + phase_reg_val
             
-            
-          
+            if norm_loss:
+                batch = points.shape[0]
+                time =  points.shape[1]
+                loss /= (batch*time)
+
                 
             running += loss.item()
             grad = None
@@ -99,7 +103,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
 def train(net, start_epochs, epochs, train, test, optimiser, 
             loss_function, loss_params, supervised, scheduler, name, 
             batch, random_stop, clip=False, clip_args={}, log_grad =False,
-            phase_reg_function=None, phase_reg_lambda=None ):
+            phase_reg_function=None, phase_reg_lambda=None, norm_loss = False ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -109,9 +113,16 @@ def train(net, start_epochs, epochs, train, test, optimiser,
     try:   
         for epoch in range(epochs):
             #Train
-            running , grad= do_network(net, optimiser, loss_function, loss_params, train, scheduler=scheduler, supervised=supervised,random_stop=random_stop, clip=clip, clip_args=clip_args, phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda )
+            running , grad= do_network(net, optimiser, loss_function, loss_params, train, 
+                                        scheduler=scheduler, supervised=supervised, 
+                                        random_stop=random_stop, clip=clip, clip_args=clip_args,
+                                        phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda,
+                                        norm_loss = norm_loss )
             #Test
-            running_test, _ = do_network(net, optimiser, loss_function, loss_params, test, test=True, supervised=supervised, phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda)
+            running_test, _ = do_network(net, optimiser, loss_function, loss_params, 
+                                         test, test=True, supervised=supervised, 
+                                         phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda,
+                                         norm_loss = norm_loss)
             
             losses.append(running) #Store each epoch's losses 
             losses_test.append(running_test)
