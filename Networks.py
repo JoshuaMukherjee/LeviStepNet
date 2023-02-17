@@ -85,6 +85,7 @@ class PointNet(Module):
         out = x
         for layer in self.layers[0]:
             out = layer(out)
+            # print(out)
         local_features = out
         for layer in self.layers[1]:
             out = layer(out)
@@ -103,6 +104,13 @@ class PointNet(Module):
 
         return out
 
+
+class Identity(Module):
+    def __init__(self):
+        super(Identity,self).__init__()
+    
+    def forward(self,x):
+        return x
 
 
 class MLP(Module):
@@ -210,24 +218,32 @@ class ResBlock(Module):
         else:
             self.act = None
         
-        self.block1_norm = norm(D1)
+        if norm is not None:
+            self.block1_norm = norm(D1)
+        else:
+            self.block1_norm = None
 
         self.block2 = torch.nn.Conv1d(D1, D2, kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
     
 
         self.block3 = torch.nn.Conv1d(D , D2, kernel_size=kernel,padding=kernel_pad,padding_mode=padding_mode).to(device)
-        self.block3_norm =  norm(D2)
+        if norm is not None:
+            self.block3_norm =  norm(D2)
+        else:
+            self.block3_norm = None
         
     
     def forward(self,x):
         x1 = self.block1(x)
         if self.act is not None:
             x1 = self.act(x1)
-        x1 = self.block1_norm(x1)
+        if self.block1_norm is not None:
+            x1 = self.block1_norm(x1)
 
         x1 = self.block2(x1)
         x = self.block3(x)
-        x = self.block3_norm(x)
+        if self.block3_norm is not None:
+            x = self.block3_norm(x)
 
         x = x+x1
         if self.act is not None:
