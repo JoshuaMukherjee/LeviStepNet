@@ -269,11 +269,12 @@ if PHASES:
     last = activation_init
     
     min_dif = 0
-    max_dif = 2*torch.pi
+    max_dif = torch.pi
     for i in range(T):
         change = c[:,i,:,:] #Get change batch
         activation_out = net(change)
-        diff = torch.abs(torch.angle(activation_out) - torch.angle(last))
+        diff = torch.angle(activation_out) - torch.angle(last)
+        diff = torch.abs(torch.atan2(torch.sin(diff),torch.cos(diff)))
        
 
         diff = torch.reshape(diff,(2,16,16))
@@ -286,14 +287,15 @@ if PHASES:
         ax_up = plt.subplot(gs[0, i])
         ax_down = plt.subplot(gs[1, i])
         mshw = ax_up.matshow(act[0].detach().numpy(),vmin=min_dif, vmax=max_dif)
-        ax_down.matshow(act[1].detach().numpy())
+        ax_down.matshow(act[1].detach().numpy(),vmin=min_dif, vmax=max_dif)
         ax_up.set_axis_off()
         ax_down.set_axis_off()
        
     
     colour_ax = plt.subplot(gs[0:2,T])
-    plt.colorbar(mshw, cax=colour_ax,ticks=[0,torch.pi, 2*torch.pi])
-    colour_ax.set_yticklabels(["0","π","2π"])
+    # plt.colorbar(mshw, cax=colour_ax)
+    plt.colorbar(mshw, cax=colour_ax,ticks=[0,torch.pi])
+    colour_ax.set_yticklabels(["0","π"])
 
 
     plt.show()
