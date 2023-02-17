@@ -16,7 +16,7 @@ import random
 from Symmetric_Functions import SymSum
 from Utlilities import *
 
-
+# torch.autograd.set_detect_anomaly(True)
 
 def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, 
                 supervised=True, scheduler = None, random_stop=False, clip=False,
@@ -59,35 +59,38 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
                 if phase_reg_function is not None:
                     phases_out = torch.angle(activation_out)
                     phases_target = torch.angle(activations[:,i,:])
-                    phase_reg_val += phase_reg_lambda * phase_reg_function(phases_out,phases_target )
-
+                    phase_reg_val += phase_reg_lambda * phase_reg_function(phases_out,phases_target)
+                    
             output = torch.stack(outputs,dim=1) #compare to torch.abs(pressures[:,1:,:])
             target = torch.abs(pressures[:,1:,:])
+    
            
             # if supervised:
             #     loss = loss_function(pressure_out,torch.abs(pressures[:,end,:]),**loss_params)
             # else:
             #     loss = loss_function(pressure_out,**loss_params)
-
             if supervised:
                 loss = loss_function(output,target,**loss_params) + phase_reg_val
             else:
                 loss = loss_function(output,**loss_params) + phase_reg_val
-            
+    
+
             if norm_loss:
                 batch = points.shape[0]
                 time =  points.shape[1]
                 loss /= (batch*time)
 
-                
             running += loss.item()
             grad = None
             if not test:
                 loss.backward()
                 if clip:
                     grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
-                    grad = sum(grads)/len(grads)
-                    nn.utils.clip_grad_norm_(net.parameters(), **clip_args)
+                    grad = []
+                    grad.append((sum(grads)/len(grads)).item())
+                    nn.utils.clip_grad_value_(net.parameters(), **clip_args)
+                    grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
+                    grad.append((sum(grads)/len(grads)).item())
                     # print({n:p.grad for n, p in net.named_parameters()}["encoder.layers.5.weight"])
                 optimiser.step()
     if not test:
