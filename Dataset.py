@@ -132,10 +132,10 @@ class TimeDatasetAtomic(Dataset):
 
 if __name__ == "__main__":
     
-    timestamps = 100
-    length = 7000
-    test_length = 100
-    N = 4
+    timestamps = 10
+    length = 35000
+    test_length = 500
+    N = 8
     movement = 0.001
     
     if length > 0:
