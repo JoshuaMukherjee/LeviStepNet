@@ -88,7 +88,7 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
                     grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
                     grad = []
                     grad.append((sum(grads)/len(grads)).item())
-                    nn.utils.clip_grad_value_(net.parameters(), **clip_args)
+                    nn.utils.clip_grad_norm_(net.parameters(), **clip_args)
                     grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
                     grad.append((sum(grads)/len(grads)).item())
                     # print({n:p.grad for n, p in net.named_parameters()}["encoder.layers.5.weight"])
