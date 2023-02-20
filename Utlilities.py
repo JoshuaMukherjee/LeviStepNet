@@ -83,9 +83,19 @@ def convert_to_complex(matrix):
     return torch.permute(matrix,(0,2,1))
 
 
+
+
+
 if __name__ == "__main__":
-    mat = torch.rand((2,8,6))
-    print(mat)
-    mat = convert_to_complex(mat)
-    print(mat)
-    print(torch.sum(mat,dim=1))
+    '''
+    trans_pos(:,2) = flipud(trans_pos(:,2));   
+    trans_pos(n/2+1:end,1) = flipud(trans_pos(n/2+1:end,1));
+    '''
+
+    board = create_board(17,-.234/2)
+    board = torch.flipud(board)
+
+
+
+
+    print(torch.reshape(board,(16,16,3)))

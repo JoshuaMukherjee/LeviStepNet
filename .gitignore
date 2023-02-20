@@ -10,3 +10,4 @@ log.txt
 *.sh
 .DS_Store
 Ignore/*
+PathGenerator/Experiments

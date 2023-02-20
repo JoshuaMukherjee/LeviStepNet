@@ -312,7 +312,7 @@ if __name__ == "__main__":
     m = 512
     layers = [[64,64],[64,128],[512,256,128,m]]
     norm = torch.nn.BatchNorm1d
-    net = ResPointNet(layers,norm=norm)
+    net = ResPointNet(layers,batch_norm=norm)
     # print(net)
 
 
@@ -330,6 +330,7 @@ if __name__ == "__main__":
     data = TimeDatasetAtomic(5,4)
     points = DataLoader(data,2,shuffle=True)
     points,changes,_,_ = next(iter(points))
+    print("p",points)
     perm = permute_points(changes,[0,2,1,3],axis=3)
 
     for i in range(1,changes.shape[1]): #Want timestampts-1 iterations because first one is zeros
