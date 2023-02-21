@@ -57,7 +57,7 @@ try:
     if OLD_MOVE:
         movement = 0.005
     else:
-        movement = 0.001
+        movement = 0.0001
     
     print(movement)
     
