@@ -9,9 +9,11 @@ from Solvers import wgs
 
 import matplotlib.pyplot as plt
 import matplotlib
+import itertools
+
 matplotlib.use('tkagg')
 
-file = "Square1"
+file = "Square2"
 params = json.load(open("PathGenerator/Paths/"+file+".json","r"))
 
 positions = torch.FloatTensor(params["positions"])
@@ -39,11 +41,11 @@ def interpolate(start,end, step_size):
     return changes
 
 
-changes = interpolate(positions[0],positions[1],0.001)
+
 path = params["updater"]
 net = torch.load("SavedModels/"+path+"/"+"model_"+path+".pth",map_location=device)
 
-N=positions.shape[1]
+N=positions.shape[1] #No. Points
 start = positions[0].T
 A=forward_model(start, transducers()).to(device)
 _, _, act_init = wgs(A,torch.ones(N,1).to(device)+0j,200)
@@ -54,26 +56,45 @@ point = torch.unsqueeze(start,0)
 pressures = [torch.abs(propagate(act_init.T,point)).detach().numpy()]
 
 f = open("PathGenerator/Experiments/"+file+path+".csv","w")
-f.write(str(changes.shape[0])+",512\n")
-#ADD WGS LINE
+f.write("XXXXXX\n")
+frames = 1
+trans_n = "512"
 
-for change in changes:
-    change = torch.unsqueeze(change,0)
-    change = torch.permute(change,(0,2,1))
-    point += change
+init_phases_ud = torch.flipud(torch.angle(act_init))
 
-    activation_out = net(change) 
-    phases = torch.angle(activation_out)
-    pressures.append(torch.abs(propagate(activation_out,point)).detach().numpy())
-
-
-    phases_ud = torch.flipud(phases) #CHECK THIS WORKS FOR 2x16x16
-    for i,phase in enumerate(phases_ud[0]):
+for i,phase in enumerate(init_phases_ud):
         f.write(str(phase.item()))
         if i < 511:
             f.write(",")
         else:
             f.write("\n")
+
+a, b = itertools.tee(positions)
+next(b, None)
+for start, end in zip(a, b):
+    changes = interpolate(start,end,0.0001)
+    for change in changes:
+        change = torch.unsqueeze(change,0)
+        change = torch.permute(change,(0,2,1))
+        point += change
+
+        activation_out = net(change) 
+        phases = torch.angle(activation_out)
+        pressures.append(torch.abs(propagate(activation_out,point)).detach().numpy())
+
+
+        phases_ud = torch.flipud(phases) #CHECK THIS WORKS FOR 2x16x16
+        for i,phase in enumerate(phases_ud[0]):
+            f.write(str(phase.item()))
+            if i < 511:
+                f.write(",")
+            else:
+                f.write("\n")
+        frames +=1
+
+        
+f.seek(0)
+f.write(str(frames)+","+trans_n+"\n")        
 f.close()
 
 
@@ -93,3 +114,4 @@ if "-p" in sys.argv:
     plt.show()
     
 
+##Animation? https://matplotlib.org/stable/gallery/animation/random_walk.html
