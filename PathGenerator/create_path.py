@@ -55,6 +55,7 @@ pressures = [torch.abs(propagate(act_init.T,point)).detach().numpy()]
 
 f = open("PathGenerator/Experiments/"+file+path+".csv","w")
 f.write(str(changes.shape[0])+",512\n")
+#ADD WGS LINE
 
 for change in changes:
     change = torch.unsqueeze(change,0)
@@ -66,7 +67,7 @@ for change in changes:
     pressures.append(torch.abs(propagate(activation_out,point)).detach().numpy())
 
 
-    phases_ud = torch.flipud(phases)
+    phases_ud = torch.flipud(phases) #CHECK THIS WORKS FOR 2x16x16
     for i,phase in enumerate(phases_ud[0]):
         f.write(str(phase.item()))
         if i < 511:
