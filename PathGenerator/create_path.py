@@ -13,8 +13,9 @@ import itertools
 
 matplotlib.use('tkagg')
 
-file = "Square1"
-path = "Updater142"
+file = sys.argv[1]
+path = sys.argv[2]
+shuffle = "-s" in sys.argv
 
 params = json.load(open("PathGenerator/Paths/"+file+".json","r"))
 
@@ -23,7 +24,7 @@ if params["format"] == "cm":
     positions /= 100
 
 
-def interpolate(start,end, step_size):
+def interpolate(start,end, step_size,shuffle=False):
     difference = end - start 
     
     steps = torch.Tensor.int(torch.ceil(difference / step_size))
@@ -38,7 +39,10 @@ def interpolate(start,end, step_size):
                 change[pi,di] = step_size*direction
                 changes[M,:,:] = change
                 M += 1
-                
+    
+    if shuffle:
+        idxs = torch.randperm(changes.shape[0])
+        changes = changes[idxs,:,:]
     
     return changes
 
@@ -73,7 +77,7 @@ for i,phase in enumerate(init_phases_ud):
 a, b = itertools.tee(positions)
 next(b, None)
 for start, end in zip(a, b):
-    changes = interpolate(start,end,0.0001)
+    changes = interpolate(start,end,0.0001,shuffle=shuffle)
     for change in changes:
         change = torch.unsqueeze(change,0)
         change = torch.permute(change,(0,2,1))

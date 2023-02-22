@@ -255,11 +255,12 @@ if TIME:
             stds.append(torch.std(pressure_out))
     means = [m.detach().numpy() for m in means]
     stds =  [s.detach().numpy() for s in stds]
-    plt.xlabel("Time")
+    plt.xlabel("Frame")
     # plt.plot(means,label="Mean")
-    plt.plot(stds,label="Standard Deviation")
+    # plt.plot(stds,label="Standard Deviation")
     for i,point in enumerate(points):
         plt.plot(point,label="point "+str(i))
+    plt.ylabel("Pressure")
     plt.legend()
     plt.show()
 
