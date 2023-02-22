@@ -1,8 +1,7 @@
 {
-    "net":"PointNet",
+    "net":"ResPointNet",
     "net-args":{
-        "layer_sets":[[48,48,48],[48,48,48],[48,48,48,1024]],
-        "batch_norm":"BatchNorm1d",
+        "layer_sets":[[48,48,48,48],[48,48,48,48],[48,48,48,1024]],
         "input_size":35,
         "activation":"SELU"
     },
@@ -18,24 +17,15 @@
     },
     "start-epochs":0,
     "epochs":50,
-    "train":["Train-10-70000-4A.pth"],
-    "test":["Test-10-1000-4A.pth"],
+    "train":["Train-100-10-4A.pth"],
+    "test":["Test-100-5-4A.pth"],
     "optimiser":"NAdam",
-    "optimiser-args":{"lr":1e-4},
+    "optimiser-args":{"lr":1e-2},
     "loss-function":"mse_loss",
     "supervised":true,
-    "batch":2,
-    "scheduler":"CyclicLR",
-    "scheduler-args":{"base_lr":1e-4,
-                        "max_lr":1e-3,
-                        "step_size_up":5,
-                        "cycle_momentum":false
-                    },
+    "batch":5,
     "clip":true,
     "clip-args":{"max_norm":1e9},
     "log-grad":false,
-    "phase-reg-fun":"mse_loss",
-    "phase-reg-lambda":1e5,
-    "pressure-reg-fun":"mse_loss",
-    "pressure-reg-lambda":1e-1
+    "norm-loss":true
 }

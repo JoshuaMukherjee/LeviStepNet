@@ -94,7 +94,8 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
                 if clip:
                     grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
                     grad = []
-                    grad.append((sum(grads)/len(grads)).item())
+                    grad.append(grads)
+                   
                     nn.utils.clip_grad_norm_(net.parameters(), **clip_args)
                     grads = [torch.sum(p.grad) for n, p in net.named_parameters()]
                     grad.append((sum(grads)/len(grads)).item())

@@ -10,6 +10,10 @@ def max_loss(pressure, true):
 def mse_loss(expected, found):
   return torch.nn.MSELoss()(expected,found)
 
+def mse_loss_print(expected, found):
+  l = torch.nn.MSELoss()(expected,found)
+  return l
+
 def mean_std(output,alpha=0.01):
   if len(output.shape) > 1:
     dim = 1
