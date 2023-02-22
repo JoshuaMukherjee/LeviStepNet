@@ -20,7 +20,8 @@ from Utlilities import *
 
 def do_network(net, optimiser,loss_function,loss_params, datasets,test=False, 
                 supervised=True, scheduler = None, random_stop=False, clip=False,
-                clip_args={}, phase_reg_function = None, phase_reg_lambda = 0, norm_loss = False):
+                clip_args={}, phase_reg_function = None, phase_reg_lambda = 0, norm_loss = False,
+                pressure_reg_function=None, pressure_reg_lambda=None):
     #TRAINING
     running = 0
     if not test:
@@ -44,6 +45,8 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
             end = 0
             outputs = []
             phase_reg_val = 0
+            pressure_reg_val = 0
+            prev_p = torch.abs(pressures[:,0,:])
             for i in range(1,changes.shape[1]): #iterate over timestamps - Want timestamps-1 iterations because first one is zeros  
                 change = changes[:,i,:,:] #Get batch Bxtx3xN
                 activation_out = net(change)
@@ -60,6 +63,10 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
                     phases_out = torch.angle(activation_out)
                     phases_target = torch.angle(activations[:,i,:])
                     phase_reg_val += phase_reg_lambda * phase_reg_function(phases_out,phases_target)
+                
+                if pressure_reg_function is not None:
+                    pressure_reg_val += pressure_reg_lambda * pressure_reg_function(pressure_out,prev_p)
+                prev_p = pressure_out
                     
             output = torch.stack(outputs,dim=1) #compare to torch.abs(pressures[:,1:,:])
             target = torch.abs(pressures[:,1:,:])
@@ -70,9 +77,9 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
             # else:
             #     loss = loss_function(pressure_out,**loss_params)
             if supervised:
-                loss = loss_function(output,target,**loss_params) + phase_reg_val
+                loss = loss_function(output,target,**loss_params) + phase_reg_val + pressure_reg_val
             else:
-                loss = loss_function(output,**loss_params) + phase_reg_val
+                loss = loss_function(output,**loss_params) + phase_reg_val + pressure_reg_val
     
 
             if norm_loss:
@@ -106,7 +113,8 @@ def do_network(net, optimiser,loss_function,loss_params, datasets,test=False,
 def train(net, start_epochs, epochs, train, test, optimiser, 
             loss_function, loss_params, supervised, scheduler, name, 
             batch, random_stop, clip=False, clip_args={}, log_grad =False,
-            phase_reg_function=None, phase_reg_lambda=None, norm_loss = False ):
+            phase_reg_function=None, phase_reg_lambda=None, 
+            pressure_reg_function= None, pressure_reg_lambda=None, norm_loss = False ):
     print(name, "Training....")
     start_time = time.asctime()
     losses = []
@@ -120,11 +128,13 @@ def train(net, start_epochs, epochs, train, test, optimiser,
                                         scheduler=scheduler, supervised=supervised, 
                                         random_stop=random_stop, clip=clip, clip_args=clip_args,
                                         phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda,
+                                        pressure_reg_function=pressure_reg_function, pressure_reg_lambda=pressure_reg_lambda,
                                         norm_loss = norm_loss )
             #Test
             running_test, _ = do_network(net, optimiser, loss_function, loss_params, 
                                          test, test=True, supervised=supervised, 
                                          phase_reg_function=phase_reg_function, phase_reg_lambda=phase_reg_lambda,
+                                         pressure_reg_function=pressure_reg_function, pressure_reg_lambda=pressure_reg_lambda,
                                          norm_loss = norm_loss)
             
             losses.append(running) #Store each epoch's losses 

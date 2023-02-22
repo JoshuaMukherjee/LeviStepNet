@@ -24,7 +24,7 @@
     "optimiser-args":{"lr":1e-4},
     "loss-function":"mse_loss",
     "supervised":true,
-    "batch":2,
+    "batch":32,
     "scheduler":"CyclicLR",
     "scheduler-args":{"base_lr":1e-4,
                         "max_lr":1e-3,

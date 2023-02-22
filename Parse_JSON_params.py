@@ -12,7 +12,7 @@ from Dataset import TimeDataset, TimeDatasetAtomic
 
 
 files = [
-   "Updater142"
+   "Updater143"
 ]
 
 
@@ -77,6 +77,13 @@ def parse(params,name):
     else:
         phase_reg_function = None
         phase_reg_lambda = 0
+
+    if "pressure-reg-fun" in params:
+        pressure_reg_function = getattr(Loss_Functions, params["pressure-reg-fun"])
+        pressure_reg_lambda = params["pressure-reg-lambda"]
+    else:
+        pressure_reg_function = None
+        pressure_reg_lambda = 0
     
     if "norm-loss" in params:
         norm_loss = True
@@ -88,6 +95,7 @@ def parse(params,name):
         loss_function,loss_params, supervised, scheduler, 
         name, batch, rand_stop, clip, clip_params, log_grad,
         phase_reg_function, phase_reg_lambda,
+        pressure_reg_function, pressure_reg_lambda,
         norm_loss)
 
 
