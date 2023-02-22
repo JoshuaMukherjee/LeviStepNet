@@ -239,6 +239,9 @@ if TIME:
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
     stds = []
+    points = []
+    for i in range(point_count):
+        points.append([])
     for p,c,a,pr in data:
         activation_init = a[:,0,:]
         net.init(activation_init)
@@ -246,13 +249,17 @@ if TIME:
             change = c[:,i,:,:] #Get batch
             activation_out = net(change)
             pressure_out = torch.abs(propagate(activation_out,p[:,i,:]))
+            for i,point in enumerate(pressure_out):
+                points[i].append(point.item())       
             means.append(torch.mean(pressure_out))
             stds.append(torch.std(pressure_out))
     means = [m.detach().numpy() for m in means]
     stds =  [s.detach().numpy() for s in stds]
     plt.xlabel("Time")
-    plt.plot(means,label="Mean")
+    # plt.plot(means,label="Mean")
     plt.plot(stds,label="Standard Deviation")
+    for i,point in enumerate(points):
+        plt.plot(point,label="point "+str(i))
     plt.legend()
     plt.show()
 

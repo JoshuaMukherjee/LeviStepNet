@@ -13,7 +13,9 @@ import itertools
 
 matplotlib.use('tkagg')
 
-file = "Square2"
+file = "Square1"
+path = "Updater142"
+
 params = json.load(open("PathGenerator/Paths/"+file+".json","r"))
 
 positions = torch.FloatTensor(params["positions"])
@@ -42,7 +44,6 @@ def interpolate(start,end, step_size):
 
 
 
-path = params["updater"]
 net = torch.load("SavedModels/"+path+"/"+"model_"+path+".pth",map_location=device)
 
 N=positions.shape[1] #No. Points
