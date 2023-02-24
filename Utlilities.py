@@ -83,7 +83,11 @@ def convert_to_complex(matrix):
     return torch.permute(matrix,(0,2,1))
 
 
-
+def convert_pats(board):
+    board[512//2+1:,0] = torch.flipud(board[512//2+1:,0]);
+    board[:,1] = torch.flipud(board[:,1]);
+    board[:,2] = torch.flipud(board[:,2]);
+    return board
 
 
 if __name__ == "__main__":
@@ -92,10 +96,11 @@ if __name__ == "__main__":
     trans_pos(n/2+1:end,1) = flipud(trans_pos(n/2+1:end,1));
     '''
 
-    board = create_board(17,-.234/2)
-    board = torch.flipud(board)
-
-
-
-
-    print(torch.reshape(board,(16,16,3)))
+    board = transducers()
+    board[512//2+1:,0] = torch.flipud(board[512//2+1:,0]);
+    board[:,1] = torch.flipud(board[:,1]);
+    board[:,2] = torch.flipud(board[:,2]);
+    
+    for row in board:
+        print(row)
+    # print(torch.reshape(board,(16,16,3)))

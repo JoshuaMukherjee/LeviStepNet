@@ -27,7 +27,8 @@ if params["format"] == "cm":
 def interpolate(start,end, step_size,shuffle=False):
     difference = end - start 
     
-    steps = torch.Tensor.int(torch.ceil(difference / step_size))
+    steps = torch.Tensor.int(torch.ceil(difference / step_size)) #May cause off my one - doesnt matter for now
+    print(steps)
     N = int((torch.sum(torch.abs(steps))).item())
     changes = torch.zeros(N,start.shape[0],start.shape[1])
     M = 0
@@ -43,7 +44,7 @@ def interpolate(start,end, step_size,shuffle=False):
     if shuffle:
         idxs = torch.randperm(changes.shape[0])
         changes = changes[idxs,:,:]
-    
+
     return changes
 
 
@@ -88,8 +89,9 @@ for start, end in zip(a, b):
         pressures.append(torch.abs(propagate(activation_out,point)).detach().numpy())
 
 
-        phases_ud = torch.flipud(phases) #CHECK THIS WORKS FOR 2x16x16
-        for i,phase in enumerate(phases_ud[0]):
+        phases_converted = convert_pats(phases)
+
+        for i,phase in enumerate(phases_converted[0]):
             f.write(str(phase.item()))
             if i < 511:
                 f.write(",")
