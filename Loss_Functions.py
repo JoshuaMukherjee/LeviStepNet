@@ -21,6 +21,9 @@ def mean_std(output,alpha=0.01):
     dim = 0
   m = -1 * (torch.mean(output,dim) - alpha*torch.std(output,dim) )
   return torch.sum(m,0)
+
+def l1Loss(expected, found):
+  return torch.nn.L1Loss()(expected,found)
   
 
 def cosine_accuracy(target, output):
