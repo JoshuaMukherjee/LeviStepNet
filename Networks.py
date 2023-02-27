@@ -37,11 +37,20 @@ class PointNet(Module):
         else:
             self.output_funct = None
         
+
+        
+        Group_norm= False
         if type(batch_norm) == str:
+            if batch_norm == "GroupNorm":
+                Group_norm = True
+                groups = batch_args["groups"]
+                batch_args.pop("groups")
             batch_norm = getattr(torch.nn,batch_norm)
         
         if type(activation) == str:
             activation = getattr(torch.nn,activation) 
+        
+
 
         local_features = layer_sets[0][-1]
         for i,layer_set in enumerate(layer_sets):
@@ -70,16 +79,24 @@ class PointNet(Module):
                     act = activation[i][j]
                     if act is not None:
                         self.layers[i].append(act().to(device))
-                
                 if batch_norm is not None:
                     if type(batch_norm) is not list:
-                        self.layers[i].append(batch_norm(out_channels,**batch_args).to(device))
+                        if Group_norm:
+                            norm=  batch_norm(groups,out_channels,**batch_args).to(device)
+                        else:
+                            norm = batch_norm(out_channels,**batch_args).to(device)
+                        self.layers[i].append(norm)
                     else:
                         norm = batch_norm[i][j]
-                        if act is not None:
-                            self.layers[i].append(norm(out_channels,**batch_args[i][j]).to(device))
+                        if norm is not None:
+                            if Group_norm:
+                                norm_layer=  batch_norm(groups,out_channels,**batch_args).to(device)
+                            else:
+                                norm_layer = batch_norm(out_channels,**batch_args).to(device)
+                            self.layers[i].append(norm_layer)
             
-        # print(self.layers)
+            
+        print(self.layers)
 
     def forward(self, x):
         out = x
@@ -118,14 +135,19 @@ class MLP(Module):
                     activation=torch.nn.SELU, batch_norm=None, batch_args={},batch_channels=2,batch_old=False):
         super(MLP,self).__init__()
         self.layers = torch.nn.ModuleList()
+
         
         in_channels= input_size
         out_channels = layers[0]
 
+        Group_norm = False
         if type(batch_norm) == str:
+            if batch_norm == "GroupNorm":
+                Group_norm = True
+                groups = batch_args["groups"]
+                batch_args.pop("groups")
             batch_norm = getattr(torch.nn,batch_norm)
         
-
 
         self.layers.append(torch.nn.Linear(in_channels,out_channels,**layer_args).to(device))
         
@@ -144,15 +166,24 @@ class MLP(Module):
                     act = getattr(Activations,activation[0]) 
             self.layers.append(act().to(device))
 
+        norm_layer = None
         if type(batch_norm) is not list and batch_norm is not None:
             if batch_old:
                 channel = batch_channels
             else:
                 channel = out_channels
-            self.layers.append(batch_norm(channel,**batch_args).to(device))
+            if Group_norm:
+                norm_layer=  batch_norm(groups,channel,**batch_args).to(device)
+            else:
+                norm_layer=  batch_norm(channel,**batch_args).to(device)
+           
         elif type(batch_norm) is list :
-            self.layers.append(batch_norm[0](channel,**batch_args).to(device))
-       
+            norm_layer = batch_norm[0](channel,**batch_args).to(device)
+        
+        if norm_layer is not None:
+            self.layers.append(norm_layer)
+
+
         for i,layer in enumerate(layers[1:]):
             in_channels = layers[i] #As starting from [1:] in layers i will be actually one off from position
             out_channels = layer
@@ -174,15 +205,24 @@ class MLP(Module):
                         activation = getattr(Activations,activation[i+1]) 
                 
                 self.layers.append(activation().to(device))
-            
+        
+
+            norm_layer = None
             if type(batch_norm) is not list and batch_norm is not None:
                 if batch_old:
                     channel = batch_channels
                 else:
                     channel = out_channels
-                self.layers.append(batch_norm(channel,**batch_args).to(device))
+                if Group_norm:
+                    norm_layer=  batch_norm(groups,channel,**batch_args).to(device)
+                else:
+                    norm_layer=  batch_norm(channel,**batch_args).to(device)
+            
             elif type(batch_norm) is list :
-                self.layers.append(batch_norm[i+1](channel,**batch_args).to(device))
+                norm_layer = batch_norm[i+1](channel,**batch_args).to(device)
+            
+            if norm_layer is not None:
+                self.layers.append(norm_layer)
             
     def forward(self,x):
         out = x
