@@ -117,7 +117,7 @@ if "-p" in sys.argv:
     
     plt.legend()
     plt.xlabel("Frame")
-    plt.ylabel("Pressure")
+    plt.ylabel("Pressure (Pa)")
     plt.show()
     
 

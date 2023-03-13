@@ -138,6 +138,7 @@ if BOXPLOTS:
             ax.boxplot(to_plot.values())
             ax.set_xticklabels(to_plot.keys())
             ax.set_ylim(bottom=0,top=13000)
+            ax.set_ylabel("Pressure (Pa)")
 
             
 
@@ -234,7 +235,7 @@ if ACTIVATIONS:
 
 if TIME:
     N = 1
-    T = 40
+    T = 50
     dataset = TimeDatasetAtomic(N,T,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
     means = []
@@ -260,7 +261,8 @@ if TIME:
     # plt.plot(stds,label="Standard Deviation")
     for i,point in enumerate(points):
         plt.plot(point,label="point "+str(i))
-    plt.ylabel("Pressure")
+    plt.ylabel("Pressure (Pa)")
+    plt.ylim(0)
     plt.legend()
     plt.show()
 
