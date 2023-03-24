@@ -159,17 +159,17 @@ if LOSS:
     plt.plot(train,label="train")
     plt.plot(test,label="test")
     plt.yscale("symlog")
-    plt.legend()
+    
     plt.xlabel("epoch")
     plt.ylabel("loss")
 
     try:
         max_epoch = net.epoch_saved
-        plt.plot(max_epoch,test[max_epoch],"x")
+        plt.plot(max_epoch,test[max_epoch],"x",label="Best Test Loss")
     except AttributeError:
         pass
 
-
+    plt.legend()
     plt.show()
 
 if MAX_LOSS:
@@ -273,23 +273,37 @@ if PHASES:
     data = iter(DataLoader(dataset,1,shuffle=True))
 
     to_disp = []
+    wgs_acts = []
     p,c,a,pr = next(data)
     activation_init = a[:,0,:]
     net.init(activation_init)
     last = activation_init
+    last_wgs = activation_init
     
     min_dif = 0
     max_dif = torch.pi
-    for i in range(T):
+    for i in range(1,T):
         change = c[:,i,:,:] #Get change batch
         activation_out = net(change)
         diff = torch.angle(activation_out) - torch.angle(last)
         diff = torch.abs(torch.atan2(torch.sin(diff),torch.cos(diff)))
        
-
+        diff = convert_pats(diff)
         diff = torch.reshape(diff,(2,16,16))
+
         to_disp.append(diff)
         last = activation_out
+
+        wgs_new = a[:,i,:]
+        diff_wgs = torch.angle(last_wgs) - torch.angle(wgs_new)
+        diff_wgs = torch.abs(torch.atan2(torch.sin(diff_wgs),torch.cos(diff_wgs)))
+        diff_wgs = convert_pats(diff_wgs)
+        diff_wgs = torch.reshape(diff_wgs,(2,16,16))
+        wgs_acts.append(diff_wgs)
+        last_wgs = wgs_new
+
+
+
     print(min_dif,max_dif)
     gs = matplotlib.gridspec.GridSpec(2,T+1)
 
@@ -298,8 +312,44 @@ if PHASES:
         ax_down = plt.subplot(gs[1, i])
         mshw = ax_up.matshow(act[0].detach().numpy(),vmin=min_dif, vmax=max_dif)
         ax_down.matshow(act[1].detach().numpy(),vmin=min_dif, vmax=max_dif)
-        ax_up.set_axis_off()
-        ax_down.set_axis_off()
+        # ax_up.set_axis_off()
+        # ax_down.set_axis_off()
+        ax_up.set_yticks([])
+        ax_down.set_yticks([])
+
+        ax_up.set_xticks([])
+        ax_down.set_xticks([])
+        ax_up.set_title("Frame "+str(i+1))
+        if i == 0:
+             ax_up.set_ylabel("Top PAT")
+             ax_down.set_ylabel("Bottom PAT")
+       
+    
+    colour_ax = plt.subplot(gs[0:2,T])
+    # plt.colorbar(mshw, cax=colour_ax)
+    plt.colorbar(mshw, cax=colour_ax,ticks=[0,torch.pi])
+    colour_ax.set_yticklabels(["0","π"])
+
+    plt.show()
+
+    gs = matplotlib.gridspec.GridSpec(2,T+1)
+
+    for i,act in enumerate(wgs_acts):
+        ax_up = plt.subplot(gs[0, i])
+        ax_down = plt.subplot(gs[1, i])
+        mshw = ax_up.matshow(act[0].detach().numpy(),vmin=min_dif, vmax=max_dif)
+        ax_down.matshow(act[1].detach().numpy(),vmin=min_dif, vmax=max_dif)
+        # ax_up.set_axis_off()
+        # ax_down.set_axis_off()
+        ax_up.set_yticks([])
+        ax_down.set_yticks([])
+
+        ax_up.set_xticks([])
+        ax_down.set_xticks([])
+        ax_up.set_title("Frame "+str(i+1))
+        if i == 0:
+             ax_up.set_ylabel("Top PAT")
+             ax_down.set_ylabel("Bottom PAT")
        
     
     colour_ax = plt.subplot(gs[0:2,T])

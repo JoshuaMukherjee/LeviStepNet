@@ -22,6 +22,7 @@ FRAME_THRESHOLD = 10
 params = json.load(open("PathGenerator/Paths/"+file+".json","r"))
 
 positions = torch.FloatTensor(params["positions"])
+
 if params["format"] == "cm":
     positions /= 100
 
@@ -46,6 +47,7 @@ def interpolate(start,end, step_size,shuffle=False):
         idxs = torch.randperm(changes.shape[0])
         changes = changes[idxs,:,:]
 
+    print(changes.shape)
     return changes
 
 
