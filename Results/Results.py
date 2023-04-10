@@ -151,6 +151,7 @@ if BOXPLOTS:
 if LOSS:
     loss = pickle.load(open("SavedModels/"+path+"/"+"loss_"+path+".pth","rb"))
     train,test = loss
+    print(len(train))
     if NORM:
         train = train/np.linalg.norm(train)
         test = test/np.linalg.norm(test)
