@@ -9,3 +9,22 @@ class SineActivation(Module):
     
     def forward(self,x):
         return torch.sin(x)
+
+
+
+def plotSELU():
+    import matplotlib
+    import matplotlib.pyplot as plt
+    matplotlib.use("TkAgg")
+
+    x = torch.linspace(-10,5,100)
+    selu = torch.nn.SELU()
+    y = selu(x)
+    plt.plot(x,y)
+    plt.xlabel("Input")
+    plt.ylabel("Output")
+    plt.show()
+
+if __name__ == "__main__":
+    plotSELU()
+
