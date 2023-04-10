@@ -98,7 +98,7 @@ for start, end in zip(a, b):
 
         activation_out = net(change) 
         phases = torch.angle(activation_out)
-        phase_frames.append(torch.mean(phases))
+        phase_frames.append(torch.mean(torch.abs(torch.angle(act_init))))
         
         p_prop = propagate(activation_out,point)
         pressures.append(torch.abs(p_prop).detach().numpy())
@@ -120,7 +120,9 @@ for start, end in zip(a, b):
                 A=forward_model(p, transducers()).to(device)
                 _, _, act_init = wgs(A,torch.ones(N,1).to(device)+0j,200)
                 net.init(act_init.T)
-                phase_frames.append(torch.mean(torch.angle(act_init)))
+                
+                phase_frames.append(torch.mean(torch.abs(torch.angle(act_init))))
+                
                 pres =torch.abs(propagate(act_init.T,point)).detach()
                 mean_p = torch.mean(pres)
                 pres = pres.numpy()
@@ -145,7 +147,7 @@ for start, end in zip(a, b):
                 p = torch.squeeze(torch.permute(point,(0,1,2)))
                 A=forward_model(p, transducers()).to(device)
                 
-                T_in=torch.pi/20
+                T_in=torch.pi/8
                 T_out = 0
 
                 act = activation_out.T
@@ -153,7 +155,7 @@ for start, end in zip(a, b):
 
                 _, _, act_init = temporal_wgs(A,torch.ones(N,1).to(device)+0j,200, act, prop,T_in,T_out)
                 net.init(act_init.T)
-                phase_frames.append(torch.mean(torch.angle(act_init)))
+                phase_frames.append(torch.mean(torch.abs(torch.angle(act_init))))
                 
                 pres =torch.abs(propagate(act_init.T,point)).detach()
                 mean_p = torch.mean(pres)
@@ -187,7 +189,7 @@ f.close()
 if "-p" in sys.argv:
     pressures = torch.tensor(pressures)
 
-    phase_frames = [torch.abs(torch.atan2(torch.sin(i),torch.cos(i))) for i in phase_frames]
+    # phase_frames = [torch.atan2(torch.sin(i),torch.cos(i)) for i in phase_frames]
     phase_changes = []
     for i in range(1,len(phase_frames)):
         phase_changes.append((phase_frames[i] - phase_frames[i-1]).detach().numpy())
@@ -207,19 +209,19 @@ if "-p" in sys.argv:
     ax.set_yticks(torch.linspace(0,10000,11).numpy())
 
     ax = plt.subplot(2,1,2)
-    ax.plot(phase_changes)
-    ax.set_ylabel("Phase Change (Rad)")
+    ax.plot(phase_changes[1:])
+    ax.set_ylabel("Mean Absolute Phase Change (Rad)")
     ax.set_xlabel("Frame")
 
     length = len(phase_changes)
     phase_changes_reset_frames = [phase_changes[i] for i in resets[0] if i < length]
     x_resets = [r for r in resets[0] if r < length]
 
-    ax.plot(x_resets,phase_changes_reset_frames,"x",label="Re-initialisations")
+    # ax.plot(x_resets,phase_changes_reset_frames,"x",label="Re-initialisations")
     # if temp_reset:
     #     ax.plot(torch.linspace(0,frames,frames),torch.ones(frames)*T_in,label="T_in limit = pi/" + str(int(torch.pi/T_in)),color="green")
     #     ax.plot(torch.linspace(0,frames,frames),torch.ones(frames)*-1*T_in,color="green")
-    ax.legend()
+    # ax.legend()
 
     # plt.ylim(bottom=0)
     plt.show()
