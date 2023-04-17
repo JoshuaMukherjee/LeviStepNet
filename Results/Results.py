@@ -269,7 +269,7 @@ if TIME:
 
 if PHASES:
     N = 2
-    T = 5
+    T = 10
     dataset = TimeDatasetAtomic(N,T,N=point_count,signed=SIGNED,movement=movement)
     data = iter(DataLoader(dataset,1,shuffle=True))
 
