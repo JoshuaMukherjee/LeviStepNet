@@ -71,14 +71,18 @@ pressures = [torch.abs(propagate(act_init.T,point)).detach().numpy()]
 resets = [[],[]]
 
 f = open("PathGenerator/Experiments/"+file+path+".csv","w")
-f.write("XXXXXX\n")
+f.write("X"*100)
+f.write("\n")
 frames = 1
 trans_n = "512"
 
+FLIP_INDEX = get_convert_indexes()
 
-init_phases_ud = convert_pats(torch.angle(act_init).T)
 
-for i,phase in enumerate(init_phases_ud[0,:]):
+init_phases = torch.angle(act_init)
+init_phases_ud = init_phases[FLIP_INDEX]
+
+for i,phase in enumerate(init_phases_ud):
         f.write(str(phase.item()))
         if i < 511:
             f.write(",")
@@ -90,6 +94,7 @@ next(b, None)
 since_reset = 0
 phase_frames = [torch.mean(torch.angle(act_init))]
 for start, end in zip(a, b):
+    print(frames)
     changes = interpolate(start,end,0.0001,shuffle=shuffle)
     for change in changes:
         change = torch.unsqueeze(change,0)
@@ -102,10 +107,11 @@ for start, end in zip(a, b):
         
         p_prop = propagate(activation_out,point)
         pressures.append(torch.abs(p_prop).detach().numpy())
+       
+        p = phases
+        phases_converted = phases.T[FLIP_INDEX]
 
-        phases_converted = convert_pats(phases)
-
-        for i,phase in enumerate(phases_converted[0]):
+        for i,phase in enumerate(phases_converted):
             f.write(str(phase.item()))
             if i < 511:
                 f.write(",")
@@ -131,9 +137,10 @@ for start, end in zip(a, b):
                 resets[1].append(mean_p)
                 since_reset = 0
 
-                phases_converted = convert_pats(torch.angle(act_init).T)
+                phases = torch.angle(act_init).T
+                phases_converted = phases[FLIP_INDEX]
 
-                for i,phase in enumerate(phases_converted[0]):
+                for i,phase in enumerate(phases_converted):
                     f.write(str(phase.item()))
                     if i < 511:
                         f.write(",")
@@ -165,9 +172,11 @@ for start, end in zip(a, b):
                 resets[1].append(mean_p)
                 since_reset = 0
 
-                phases_converted = convert_pats(torch.angle(act_init).T)
+                phases = torch.angle(act_init)
+                phases_converted = phases[FLIP_INDEX]
 
-                for i,phase in enumerate(phases_converted[0]):
+
+                for i,phase in enumerate(phases_converted):
                     f.write(str(phase.item()))
                     if i < 511:
                         f.write(",")
@@ -179,7 +188,7 @@ for start, end in zip(a, b):
         
         
 f.seek(0)
-f.write(str(frames)+","+trans_n+"\n")        
+f.write(str(frames)+","+trans_n+",")        
 f.close()
 
 
@@ -198,7 +207,8 @@ if "-p" in sys.argv:
     for i in range(pressures.shape[1]):
         ax.plot(pressures[:,i],label="point "+str(i))
     
-    ax.plot(resets[0],resets[1],"x",label="Re-initialisations")
+    if wgs_reset or temp_reset:
+        ax.plot(resets[0],resets[1],"x",label="Re-initialisations")
     
     ax.legend()
     ax.set_xlabel("Frame")

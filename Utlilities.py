@@ -84,10 +84,30 @@ def convert_to_complex(matrix):
 
 
 def convert_pats(board):
+    raise Exception("DO NOT USE")
     board[512//2+1:,0] = torch.flipud(board[512//2+1:,0]);
     board[:,1] = torch.flipud(board[:,1]);
     board[:,2] = torch.flipud(board[:,2]);
     return board
+
+def get_convert_indexes():
+    
+    board = transducers()
+    board[512//2:,0] = torch.flipud(board[512//2:,0]);
+    board[:,1] = torch.flipud(board[:,1]);
+    board[:,2] = torch.flipud(board[:,2]);
+    indexes = []
+
+    for t,row in enumerate(board):
+        for b,row_b in enumerate(transducers()):
+            if torch.all(row == row_b):
+                indexes.append(b)
+
+
+    indexes = torch.as_tensor(indexes)
+
+
+    return indexes
 
 
 if __name__ == "__main__":
@@ -97,10 +117,26 @@ if __name__ == "__main__":
     '''
 
     board = transducers()
-    board[512//2+1:,0] = torch.flipud(board[512//2+1:,0]);
+    print(board.shape)
+    board[512//2:,0] = torch.flipud(board[512//2:,0]);
     board[:,1] = torch.flipud(board[:,1]);
     board[:,2] = torch.flipud(board[:,2]);
+    indexes = []
+
+    for t,row in enumerate(board):
+        for b,row_b in enumerate(transducers()):
+            if torch.all(row == row_b):
+                indexes.append(b)
+
+
+    indexes = torch.as_tensor(indexes)
+    trans = transducers()
+    flipped = trans[indexes]
+
+
+    # for i,row in enumerate(flipped):
+    #     print(row)
+
     
-    for row in board:
-        print(row)
+    
     # print(torch.reshape(board,(16,16,3)))
