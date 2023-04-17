@@ -96,7 +96,7 @@ class PointNet(Module):
                             self.layers[i].append(norm_layer)
             
             
-        print(self.layers)
+        # print(self.layers)
 
     def forward(self, x):
         out = x
