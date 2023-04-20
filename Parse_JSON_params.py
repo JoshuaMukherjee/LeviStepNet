@@ -39,6 +39,7 @@ def parse(params,name):
 
     optimiser = getattr(torch.optim, params["optimiser"])(updater.parameters(),**params["optimiser-args"])
     loss_function = getattr(Loss_Functions, params["loss-function"])
+    
     if "loss-params" in params:
         loss_params = params["loss-params"]
     else:

@@ -97,6 +97,12 @@ def ph_soft(x_last,x,threshold):
 
 
 def temporal_wgs(A, y, K,ref_in, ref_out,T_in,T_out):
+    '''
+    Based off 
+    Giorgos Christopoulos, Lei Gao, Diego Martinez Plasencia, Marta Betcke, 
+    Ryuji Hirayama, and Sriram Subramanian. 2023. 
+    Temporal acoustic point holography.(under submission) (2023)
+    '''
     #ref_out -> points
     #ref_in-> transducers
     AT = torch.conj(A).T.to(device)

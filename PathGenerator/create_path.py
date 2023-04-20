@@ -18,11 +18,12 @@ path = sys.argv[2]
 shuffle = "-s" in sys.argv
 wgs_reset = "-w" in sys.argv
 temp_reset = "-t" in sys.argv
+mean = "-m" in sys.argv
 if wgs_reset and temp_reset:
     raise Exception("Can only use one of -w and -t")
 
 
-FRAME_THRESHOLD = 5
+FRAME_THRESHOLD = 10
 
 params = json.load(open("PathGenerator/Paths/"+file+".json","r"))
 
@@ -204,8 +205,11 @@ if "-p" in sys.argv:
         phase_changes.append((phase_frames[i] - phase_frames[i-1]).detach().numpy())
    
     ax = plt.subplot(2,1,1)
-    for i in range(pressures.shape[1]):
-        ax.plot(pressures[:,i],label="point "+str(i))
+    if not mean:
+        for i in range(pressures.shape[1]):
+            ax.plot(pressures[:,i],label="point "+str(i))
+    else:
+        ax.plot(torch.mean(pressures,dim=1))
     
     if wgs_reset or temp_reset:
         ax.plot(resets[0],resets[1],"x",label="Re-initialisations")
