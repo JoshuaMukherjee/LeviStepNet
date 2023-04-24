@@ -29,9 +29,11 @@ def parse(params,name):
     else:
         updater = torch.load(name+".pth",map_location=torch.device(device))
 
-
-    train_s = [torch.load("./Datasets/"+pth,map_location=torch.device(device)) for pth in params["train"] ]
-    test_s =  [torch.load("./Datasets/"+pth,map_location=torch.device(device)) for pth in params["test"]  ]
+    try:
+        train_s = [torch.load("./Datasets/"+pth,map_location=torch.device(device)) for pth in params["train"] ]
+        test_s =  [torch.load("./Datasets/"+pth,map_location=torch.device(device)) for pth in params["test"]  ]
+    except:
+        print("Dataset not found, please generate using ```python3 Dataset.py```")
 
     batch = params["batch"]
     train_sets = [DataLoader(d,batch,shuffle=True) for d in train_s]
